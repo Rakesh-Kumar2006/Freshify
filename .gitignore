@@ -1,34 +1,87 @@
 
+# ==========================================
+# Freshify - ASP.NET Core MVC
+# ==========================================
+
 # Visual Studio
 .vs/
 *.suo
 *.user
 *.userosscache
 *.sln.docstates
+*.csproj.user
+*.rsuser
+*.userprefs
 
 # Build output
 [Bb]in/
 [Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+[Dd]ebugPublic/
+[Rr]eleases/
+artifacts/
+publish/
 
-# Visual Studio generated files
+# Visual Studio cache and temporary files
 *.cache
 *.log
+*.tlog
+*.tmp
+*.pidb
+*.svclog
+*.scc
+*.vssscc
 
-# User-specific files
-*.csproj.user
-
-# ASP.NET Core
-appsettings.Development.json
-
-# Environment and secrets
+# Environment variables and secrets
 .env
 .env.*
 !.env.example
 
-# Database files (if generated locally)
+# Local application settings containing secrets
+appsettings.Development.json
+
+# Database files
 *.mdf
 *.ldf
+*.ndf
+
+# NuGet packages
+*.nupkg
+*.snupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+
+# Node.js dependencies
+node_modules/
+
+# Test results
+[Tt]est[Rr]esult*/
+*.trx
+coverage/
+
+# Publish and deployment credentials
+*.pubxml
+*.publishsettings
+PublishScripts/
+
+# Certificates and private keys
+*.pfx
+*.p12
 
 # Operating system
 .DS_Store
 Thumbs.db
+Desktop.ini
+
+# VS Code temporary files
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Local history
+.history/
+.vshistory/
+**/.localhistory/
