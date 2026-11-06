@@ -1,0 +1,376 @@
+﻿@model System.Collections.Generic.List<Freshify.Models.Payment>
+
+@{
+    ViewData["Title"] = "My Payments";
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+
+    decimal totalAmount = 0;
+    decimal paidAmount = 0;
+    decimal pendingAmount = 0;
+
+    foreach (var payment in Model)
+    {
+        totalAmount += payment.Amount;
+
+        if (string.Equals(
+            payment.PaymentStatus,
+            "Paid",
+            System.StringComparison.OrdinalIgnoreCase))
+        {
+            paidAmount += payment.Amount;
+        }
+        else if (string.Equals(
+            payment.PaymentStatus,
+            "Pending",
+            System.StringComparison.OrdinalIgnoreCase))
+        {
+            pendingAmount += payment.Amount;
+        }
+    }
+}
+
+@section Styles {
+    <style>
+        .payment-header {
+            background: #e8f2e9;
+            border: 1px solid #dce9dd;
+            border-radius: 16px;
+            padding: 26px;
+        }
+
+        .payment-stat {
+            height: 100%;
+            background: white;
+            border: 1px solid #e0e7df;
+            border-radius: 14px;
+            padding: 22px;
+        }
+
+        .payment-stat-label {
+            color: #68766c;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .payment-stat-value {
+            color: #206543;
+            font-size: 26px;
+            font-weight: 800;
+            overflow-wrap: anywhere;
+        }
+
+        .payment-panel {
+            background: white;
+            border: 1px solid #e0e7df;
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .payment-panel-heading {
+            padding: 22px;
+            border-bottom: 1px solid #e8eee5;
+        }
+
+        .payment-table {
+            margin-bottom: 0;
+            font-size: 14px;
+        }
+
+            .payment-table th {
+                background: #f3f7f2;
+                color: #48604e;
+                font-size: 12px;
+                font-weight: 700;
+                padding: 16px;
+                white-space: nowrap;
+            }
+
+            .payment-table td {
+                padding: 18px 16px;
+                vertical-align: middle;
+            }
+
+            .payment-table tbody tr:last-child td {
+                border-bottom: 0;
+            }
+
+        .payment-status {
+            display: inline-block;
+            border-radius: 20px;
+            padding: 6px 11px;
+            font-size: 12px;
+            font-weight: 700;
+            background: #eef1f4;
+            color: #52606b;
+            white-space: nowrap;
+        }
+
+            .payment-status.paid {
+                background: #e7f4eb;
+                color: #206543;
+            }
+
+            .payment-status.pending {
+                background: #fff4d9;
+                color: #805b10;
+            }
+
+            .payment-status.failed,
+            .payment-status.cancelled {
+                background: #fdeceb;
+                color: #a33730;
+            }
+
+            .payment-status.refunded {
+                background: #e9efff;
+                color: #345ca8;
+            }
+
+        .payment-note {
+            background: #f0f6ee;
+            border: 1px solid #dce9dd;
+            border-radius: 12px;
+            padding: 18px;
+            color: #48604e;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .payment-empty {
+            padding: 50px 24px;
+            text-align: center;
+        }
+
+        @@media (max-width: 575px) {
+            .payment-header,
+            .payment-stat {
+                padding: 20px;
+            }
+
+            .payment-stat-value {
+                font-size: 23px;
+            }
+        }
+    </style>
+}
+
+<div class="container py-4">
+
+    <div class="payment-header mb-4">
+        <div class="d-flex justify-content-between
+            align-items-center flex-wrap gap-3">
+            <div>
+                <h1 class="h3 fw-bold mb-2">My Payments</h1>
+
+                <p class="text-muted mb-0">
+                    View payment information for your orders.
+                </p>
+            </div>
+
+            <a asp-controller="Orders"
+               asp-action="Index"
+               class="btn btn-outline-success">
+                My Orders
+            </a>
+        </div>
+    </div>
+
+    <!-- PAYMENT SUMMARY -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3">
+            <div class="payment-stat">
+                <div class="payment-stat-label">
+                    Payment Records
+                </div>
+
+                <div class="payment-stat-value">
+                    @Model.Count
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-lg-3">
+            <div class="payment-stat">
+                <div class="payment-stat-label">
+                    Total Recorded Amount
+                </div>
+
+                <div class="payment-stat-value">
+                    ₹@totalAmount.ToString("N2")
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-lg-3">
+            <div class="payment-stat">
+                <div class="payment-stat-label">
+                    Paid Amount
+                </div>
+
+                <div class="payment-stat-value">
+                    ₹@paidAmount.ToString("N2")
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-lg-3">
+            <div class="payment-stat">
+                <div class="payment-stat-label">
+                    Pending Amount
+                </div>
+
+                <div class="payment-stat-value">
+                    ₹@pendingAmount.ToString("N2")
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- COD INFORMATION -->
+    <div class="payment-note mb-4">
+        <strong>Cash on Delivery:</strong>
+        Pay when your order is delivered. The payment remains
+        pending until collection is recorded by the administrator.
+    </div>
+
+    <!-- PAYMENT HISTORY -->
+    <div class="payment-panel">
+        <div class="payment-panel-heading">
+            <h2 class="h5 fw-bold mb-0">
+                Payment History
+            </h2>
+        </div>
+
+        @if (Model.Count == 0)
+        {
+            <div class="payment-empty">
+                <h3 class="h5 fw-bold">
+                    No payments yet
+                </h3>
+
+                <p class="text-muted mb-4">
+                    Payment information will appear after
+                    you place an order.
+                </p>
+
+                <a asp-controller="Products"
+                   asp-action="Index"
+                   class="btn btn-success px-4">
+                    Start Shopping
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table payment-table align-middle">
+                    <caption class="visually-hidden">
+                        Your order payment history
+                    </caption>
+
+                    <thead>
+                        <tr>
+                            <th scope="col">Payment ID</th>
+                            <th scope="col">Order</th>
+                            <th scope="col">Order Date</th>
+                            <th scope="col">Method</th>
+                            <th scope="col">Amount</th>
+                            <th scope="col">Payment Status</th>
+                            <th scope="col">Payment Date</th>
+                            <th scope="col">Order Status</th>
+                            <th scope="col">Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var payment in Model)
+                        {
+                            var statusClass =
+                                payment.PaymentStatus?
+                                    .Trim()
+                                    .ToLowerInvariant() switch
+                                {
+                                    "paid" => "paid",
+                                    "pending" => "pending",
+                                    "failed" => "failed",
+                                    "cancelled" => "cancelled",
+                                    "refunded" => "refunded",
+                                    _ => ""
+                                };
+
+                            <tr>
+                                <td class="fw-semibold">
+                                    #@payment.PaymentId
+                                </td>
+
+                                <td class="text-nowrap">
+                                    <a asp-controller="Orders"
+                                       asp-action="Details"
+                                       asp-route-id="@payment.OrderId"
+                                       class="text-success fw-semibold
+                                        text-decoration-none">
+                                        #@payment.OrderId
+                                    </a>
+                                </td>
+
+                                <td class="text-nowrap">
+                                    @(payment.Order?.OrderDate
+                                        .ToString("dd MMM yyyy")
+                                        ?? "Not available")
+                                </td>
+
+                                <td class="text-nowrap">
+                                    @(payment.PaymentMethod ==
+                                        "CashOnDelivery"
+                                        ? "Cash on Delivery"
+                                        : payment.PaymentMethod)
+                                </td>
+
+                                <td class="fw-bold text-nowrap">
+                                    ₹@payment.Amount.ToString("N2")
+                                </td>
+
+                                <td>
+                                    <span class="payment-status @statusClass">
+                                        @payment.PaymentStatus
+                                    </span>
+                                </td>
+
+                                <td class="text-nowrap">
+                                    @if (payment.PaymentDate.HasValue)
+                                    {
+                                        <span>
+                                            @payment.PaymentDate.Value
+                                            .ToString("dd MMM yyyy")
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="small text-muted">
+                                            Not recorded
+                                        </span>
+                                    }
+                                </td>
+
+                                <td class="text-nowrap">
+                                    @(payment.Order?.OrderStatus
+                                        ?? "Not available")
+                                </td>
+
+                                <td class="text-nowrap">
+                                    <a asp-controller="Orders"
+                                       asp-action="Details"
+                                       asp-route-id="@payment.OrderId"
+                                       class="btn btn-outline-success btn-sm">
+                                        View Details
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+
+</div>

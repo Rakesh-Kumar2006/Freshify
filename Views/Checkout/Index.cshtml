@@ -1,0 +1,372 @@
+﻿@model Freshify.ViewModels.CheckoutViewModel
+
+@{
+    ViewData["Title"] = "Checkout";
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+}
+
+@section Styles {
+    <style>
+        .checkout-header {
+            background: #e8f2e9;
+            border: 1px solid #dce9dd;
+            border-radius: 16px;
+            padding: 26px;
+        }
+
+        .checkout-card {
+            background: white;
+            border: 1px solid #e0e7df;
+            border-radius: 14px;
+            padding: 24px;
+        }
+
+            .checkout-card .form-label {
+                font-size: 13px;
+                font-weight: 650;
+            }
+
+            .checkout-card .form-control {
+                border-color: #dce4d9;
+                border-radius: 8px;
+                padding: 10px 12px;
+                font-size: 14px;
+            }
+
+                .checkout-card .form-control:focus {
+                    border-color: #518463;
+                    box-shadow: 0 0 0 3px rgba(32, 88, 61, .1);
+                }
+
+        .checkout-image {
+            width: 60px;
+            height: 60px;
+            flex-shrink: 0;
+            border-radius: 8px;
+            object-fit: contain;
+            background: #f1f5ef;
+            padding: 6px;
+        }
+
+        .checkout-placeholder {
+            display: grid;
+            place-items: center;
+            font-size: 26px;
+        }
+
+        .checkout-price {
+            color: #206543;
+            font-size: 25px;
+            font-weight: 800;
+        }
+
+        .checkout-item-name {
+            font-size: 14px;
+            font-weight: 650;
+            overflow-wrap: anywhere;
+        }
+
+        .cod-box {
+            background: #f1f7ef;
+            border: 1px solid #d5e5d0;
+            border-radius: 10px;
+            padding: 16px;
+        }
+
+        @@media (max-width: 575px) {
+            .checkout-header,
+            .checkout-card {
+                padding: 20px;
+            }
+        }
+    </style>
+}
+
+<div class="container py-4">
+
+    <!-- PAGE HEADER -->
+    <div class="checkout-header mb-4">
+        <h1 class="h3 fw-bold mb-2">Checkout</h1>
+
+        <p class="text-muted mb-0">
+            Confirm your delivery details and place your order.
+        </p>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger" role="alert">
+            @TempData["Error"]
+        </div>
+    }
+
+    @if (Model.Items.Count == 0)
+    {
+        <div class="checkout-card text-center py-5">
+            <h2 class="h4 fw-bold">Your cart is empty</h2>
+
+            <p class="text-muted">
+                Add products before proceeding to checkout.
+            </p>
+
+            <a asp-controller="Products"
+               asp-action="Index"
+               class="btn btn-success">
+                Browse Products
+            </a>
+        </div>
+    }
+    else
+    {
+        <form asp-controller="Checkout"
+              asp-action="PlaceOrder"
+              method="post"
+              id="checkoutForm">
+
+            @Html.AntiForgeryToken()
+
+            <div class="row g-4">
+
+                <!-- DELIVERY DETAILS -->
+                <div class="col-lg-7">
+                    <div class="checkout-card">
+                        <h2 class="h5 fw-bold mb-4">
+                            Delivery Details
+                        </h2>
+
+                        <div asp-validation-summary="All"
+                             class="text-danger small mb-3"
+                             role="alert"></div>
+
+                        <div class="row g-3">
+
+                            <div class="col-md-6">
+                                <label asp-for="FullName"
+                                       class="form-label">
+                                    Full Name
+                                </label>
+
+                                <input asp-for="FullName"
+                                       class="form-control"
+                                       placeholder="Enter your full name"
+                                       autocomplete="name"
+                                       maxlength="100"
+                                       required />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Phone"
+                                       class="form-label">
+                                    Phone Number
+                                </label>
+
+                                <input asp-for="Phone"
+                                       type="tel"
+                                       class="form-control"
+                                       placeholder="Enter your phone number"
+                                       autocomplete="tel"
+                                       maxlength="15"
+                                       required />
+                            </div>
+
+                            <div class="col-12">
+                                <label asp-for="AddressLine"
+                                       class="form-label">
+                                    Delivery Address
+                                </label>
+
+                                <textarea asp-for="AddressLine"
+                                          class="form-control"
+                                          placeholder="House number, street, area"
+                                          rows="3"
+                                          autocomplete="street-address"
+                                          maxlength="250"
+                                          required></textarea>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="City"
+                                       class="form-label"></label>
+
+                                <input asp-for="City"
+                                       class="form-control"
+                                       placeholder="Enter city"
+                                       autocomplete="address-level2"
+                                       maxlength="100"
+                                       required />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="State"
+                                       class="form-label"></label>
+
+                                <input asp-for="State"
+                                       class="form-control"
+                                       placeholder="Enter state"
+                                       autocomplete="address-level1"
+                                       maxlength="100"
+                                       required />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="PostalCode"
+                                       class="form-label">
+                                    Postal Code
+                                </label>
+
+                                <input asp-for="PostalCode"
+                                       class="form-control"
+                                       placeholder="Enter postal code"
+                                       autocomplete="postal-code"
+                                       maxlength="10"
+                                       required />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Country"
+                                       class="form-label"></label>
+
+                                <input asp-for="Country"
+                                       class="form-control"
+                                       placeholder="Enter country"
+                                       autocomplete="country-name"
+                                       maxlength="100"
+                                       required />
+                            </div>
+
+                        </div>
+
+                        <div class="mt-4">
+                            <a asp-controller="Cart"
+                               asp-action="Index"
+                               class="small text-success text-decoration-none">
+                                ← Back to Cart
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ORDER SUMMARY -->
+                <div class="col-lg-5">
+                    <div class="checkout-card">
+                        <h2 class="h5 fw-bold mb-4">
+                            Order Summary
+                        </h2>
+
+                        @foreach (var item in Model.Items)
+                        {
+                            <div class="d-flex gap-3 border-bottom pb-3 mb-3">
+
+                                @if (!string.IsNullOrWhiteSpace(item.ImageUrl))
+                                {
+                                    <img src="@Url.Content(item.ImageUrl)"
+                                         alt="@item.Name"
+                                         class="checkout-image"
+                                         loading="lazy" />
+                                }
+                                else
+                                {
+                                    <span class="checkout-image checkout-placeholder"
+                                          aria-hidden="true">
+                                        🛍️
+                                    </span>
+                                }
+
+                                <div class="flex-grow-1">
+                                    <div class="checkout-item-name">
+                                        @item.Name
+                                    </div>
+
+                                    <p class="small text-muted mb-1">
+                                        @item.Unit · Qty: @item.Quantity
+                                    </p>
+
+                                    <div class="small fw-bold">
+                                        ₹@item.Subtotal.ToString("N2")
+                                    </div>
+                                </div>
+
+                            </div>
+                        }
+
+                        <!-- TOTALS -->
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Subtotal</span>
+
+                            <strong>
+                                ₹@Model.Subtotal.ToString("N2")
+                            </strong>
+                        </div>
+
+                        <div class="d-flex justify-content-between mb-3">
+                            <span>Delivery Charges</span>
+                            <span class="text-success fw-semibold">
+                                Free
+                            </span>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center border-top pt-3">
+                            <span class="fw-bold">Total Amount</span>
+
+                            <span class="checkout-price">
+                                ₹@Model.Subtotal.ToString("N2")
+                            </span>
+                        </div>
+
+                        <!-- COD ONLY -->
+                        <div class="cod-box mt-4">
+                            <h3 class="h6 fw-bold text-success mb-2">
+                                Cash on Delivery
+                            </h3>
+
+                            <p class="small text-muted mb-0">
+                                Pay when your order is delivered.
+                                No online payment is required.
+                            </p>
+                        </div>
+
+                        <p class="small text-muted mt-3">
+                            The final total is calculated using current
+                            product prices when you place the order.
+                        </p>
+
+                        <button type="submit"
+                                id="placeOrderButton"
+                                class="btn btn-success w-100 py-2">
+                            Place Order — Cash on Delivery
+                        </button>
+
+                    </div>
+                </div>
+
+            </div>
+        </form>
+    }
+
+</div>
+
+@section Scripts {
+    <script>
+        const checkoutForm = document.getElementById("checkoutForm");
+
+        if (checkoutForm) {
+            checkoutForm.addEventListener("submit", function () {
+                const button =
+                    document.getElementById("placeOrderButton");
+
+                button.disabled = true;
+                button.textContent = "Placing order...";
+            });
+
+            // Restore the button when returning with browser Back.
+            window.addEventListener("pageshow", function () {
+                const button =
+                    document.getElementById("placeOrderButton");
+
+                button.disabled = false;
+                button.textContent =
+                    "Place Order — Cash on Delivery";
+            });
+        }
+    </script>
+}

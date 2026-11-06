@@ -1,0 +1,430 @@
+﻿@model Freshify.ViewModels.ProductListViewModel
+
+@{
+    ViewData["Title"] = "Products";
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+}
+
+@section Styles {
+    <style>
+        .products-banner {
+            background: #e8f2e9;
+            border: 1px solid #dce9dd;
+            border-radius: 16px;
+            padding: 30px;
+        }
+
+            .products-banner h1 {
+                color: #20583d;
+                font-size: 30px;
+                font-weight: 800;
+            }
+
+        .filter-panel {
+            background: white;
+            border: 1px solid #e0e7df;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .product-card {
+            height: 100%;
+            background: white;
+            border: 1px solid #e0e7df;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .product-art {
+            position: relative;
+            height: 180px;
+            background: #f1f5ef;
+        }
+
+        .product-image-link {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            font-size: 50px;
+        }
+
+        .product-art img {
+            width: 100%;
+            height: 180px;
+            object-fit: contain;
+            padding: 18px;
+        }
+
+        .product-name {
+            font-size: 16px;
+            font-weight: 700;
+            overflow-wrap: anywhere;
+        }
+
+            .product-name a {
+                color: #283c30;
+                text-decoration: none;
+            }
+
+                .product-name a:hover {
+                    color: #206543;
+                    text-decoration: underline;
+                }
+
+        .product-price {
+            color: #206543;
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .stock-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 4px 7px;
+            background: white;
+            color: #206543;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            pointer-events: none;
+        }
+
+            .stock-badge.unavailable {
+                background: #fff0ec;
+                color: #a33d30;
+            }
+
+        .product-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 14px;
+        }
+
+            .product-actions .btn {
+                width: 100%;
+                font-size: 12px;
+                padding: 9px 4px;
+            }
+
+        .buy-button {
+            background: #f2b544;
+            border-color: #f2b544;
+            color: #382b12;
+        }
+
+            .buy-button:hover {
+                background: #e6a72f;
+                border-color: #e6a72f;
+                color: #382b12;
+            }
+
+        .pagination .page-link {
+            color: #206543;
+        }
+
+        .pagination .page-item.active .page-link {
+            background: #206543;
+            border-color: #206543;
+            color: white;
+        }
+
+        @@media (max-width: 575px) {
+            .products-banner {
+                padding: 24px;
+            }
+
+            .product-art,
+            .product-art img {
+                height: 145px;
+            }
+
+            .product-actions {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+}
+
+<div class="container py-4">
+
+    <section class="products-banner mb-4">
+        <nav aria-label="Breadcrumb">
+            <ol class="breadcrumb small mb-3">
+                <li class="breadcrumb-item">
+                    <a asp-controller="Home"
+                       asp-action="Index"
+                       class="text-success text-decoration-none">
+                        Home
+                    </a>
+                </li>
+                <li class="breadcrumb-item active"
+                    aria-current="page">
+                    Products
+                </li>
+            </ol>
+        </nav>
+
+        <h1 class="mb-2">Our Products</h1>
+        <p class="text-muted mb-0">
+            Explore groceries and everyday kitchen essentials.
+        </p>
+    </section>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success" role="alert">
+            @TempData["Success"]
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger" role="alert">
+            @TempData["Error"]
+        </div>
+    }
+
+    <!-- FILTERS -->
+    <div class="filter-panel mb-4">
+        <form asp-controller="Products"
+              asp-action="Index"
+              method="get">
+
+            <div class="row g-3 align-items-end">
+                <div class="col-md-5">
+                    <label for="search"
+                           class="form-label small fw-semibold">
+                        Search Products
+                    </label>
+
+                    <input type="search"
+                           id="search"
+                           name="search"
+                           value="@Model.Search"
+                           class="form-control"
+                           placeholder="Search by product or category..." />
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="CategoryId"
+                           class="form-label small fw-semibold">
+                        Category
+                    </label>
+
+                    <select asp-for="CategoryId" class="form-select">
+                        <option value="">All Categories</option>
+
+                        @foreach (var category in Model.Categories)
+                        {
+                            <option value="@category.CategoryId">
+                                @category.CategoryName
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="d-flex gap-2">
+                        <button type="submit"
+                                class="btn btn-success flex-grow-1">
+                            Search
+                        </button>
+
+                        <a asp-controller="Products"
+                           asp-action="Index"
+                           class="btn btn-outline-secondary">
+                            Reset
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h5 fw-bold mb-0">Products</h2>
+        <span class="small text-muted">
+            @Model.TotalProducts product(s) found
+        </span>
+    </div>
+
+    <!-- PRODUCT GRID -->
+    <div class="row g-3 g-lg-4">
+        @foreach (var product in Model.Products)
+        {
+            <div class="col-6 col-md-4 col-lg-3">
+                <article class="product-card d-flex flex-column">
+
+                    <div class="product-art">
+                        <a asp-controller="Products"
+                           asp-action="Details"
+                           asp-route-id="@product.ProductId"
+                           class="product-image-link"
+                           aria-label="View @product.Name">
+
+                            @if (!string.IsNullOrWhiteSpace(product.ImageUrl))
+                            {
+                                <img src="@Url.Content(product.ImageUrl)"
+                                     alt="@product.Name"
+                                     loading="lazy" />
+                            }
+                            else
+                            {
+                                <span aria-hidden="true">🛍️</span>
+                            }
+                        </a>
+
+                        @if (product.StockQuantity > 0)
+                        {
+                            <span class="stock-badge">In Stock</span>
+                        }
+                        else
+                        {
+                            <span class="stock-badge unavailable">
+                                Out of Stock
+                            </span>
+                        }
+                    </div>
+
+                    <div class="p-3 d-flex flex-column flex-grow-1">
+                        <p class="small text-muted mb-1">
+                            @(product.Category?.CategoryName ?? "Grocery")
+                        </p>
+
+                        <h3 class="product-name mb-2">
+                            <a asp-controller="Products"
+                               asp-action="Details"
+                               asp-route-id="@product.ProductId">
+                                @product.Name
+                            </a>
+                        </h3>
+
+                        <p class="small text-muted mb-3">
+                            @product.Unit
+                        </p>
+
+                        <div class="mt-auto border-top pt-2">
+                            <span class="product-price">
+                                ₹@product.Price.ToString("N2")
+                            </span>
+
+                            @if (product.StockQuantity > 0)
+                            {
+                                <form asp-controller="Cart"
+                                      asp-action="Add"
+                                      method="post">
+
+                                    @Html.AntiForgeryToken()
+
+                                    <input type="hidden"
+                                           name="productId"
+                                           value="@product.ProductId" />
+
+                                    <input type="hidden"
+                                           name="quantity"
+                                           value="1" />
+
+                                    <div class="product-actions">
+                                        <button type="submit"
+                                                class="btn btn-success">
+                                            Add to Cart
+                                        </button>
+
+                                        <button type="submit"
+                                                asp-controller="Cart"
+                                                asp-action="BuyNow"
+                                                formmethod="post"
+                                                class="btn buy-button">
+                                            Buy Now
+                                        </button>
+                                    </div>
+                                </form>
+                            }
+                            else
+                            {
+                                <button type="button"
+                                        class="btn btn-secondary btn-sm w-100 mt-3"
+                                        disabled>
+                                    Unavailable
+                                </button>
+                            }
+                        </div>
+                    </div>
+
+                </article>
+            </div>
+        }
+    </div>
+
+    @if (Model.Products.Count == 0)
+    {
+        <div class="alert alert-light border text-center py-4">
+            <p>No products match your search or category.</p>
+            <a asp-controller="Products"
+               asp-action="Index"
+               class="btn btn-outline-success btn-sm">
+                Clear Filters
+            </a>
+        </div>
+    }
+
+    <!-- PAGINATION -->
+    @if (Model.TotalPages > 1)
+    {
+        <nav class="mt-4" aria-label="Product pages">
+            <ul class="pagination justify-content-center flex-wrap">
+
+                @if (Model.PageNumber > 1)
+                {
+                    <li class="page-item">
+                        <a class="page-link"
+                           asp-controller="Products"
+                           asp-action="Index"
+                           asp-route-categoryId="@Model.CategoryId"
+                           asp-route-search="@Model.Search"
+                           asp-route-page="@(Model.PageNumber - 1)">
+                            Previous
+                        </a>
+                    </li>
+                }
+
+                @for (var pageNumber = 1;
+                      pageNumber <= Model.TotalPages;
+                      pageNumber++)
+                {
+                    <li class="page-item @(pageNumber == Model.PageNumber ? "active" : "")">
+                        <a class="page-link"
+                           asp-controller="Products"
+                           asp-action="Index"
+                           asp-route-categoryId="@Model.CategoryId"
+                           asp-route-search="@Model.Search"
+                           asp-route-page="@pageNumber"
+                           aria-current="@(pageNumber == Model.PageNumber ? "page" : null)">
+                            @pageNumber
+                        </a>
+                    </li>
+                }
+
+                @if (Model.PageNumber < Model.TotalPages)
+                {
+                    <li class="page-item">
+                        <a class="page-link"
+                           asp-controller="Products"
+                           asp-action="Index"
+                           asp-route-categoryId="@Model.CategoryId"
+                           asp-route-search="@Model.Search"
+                           asp-route-page="@(Model.PageNumber + 1)">
+                            Next
+                        </a>
+                    </li>
+                }
+
+            </ul>
+        </nav>
+    }
+</div>

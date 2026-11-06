@@ -1,0 +1,356 @@
+﻿@{
+    var currentController =
+        ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+
+    var currentAction =
+        ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+
+    var adminName = User.Identity?.Name ?? "Administrator";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1" />
+
+    <title>@ViewData["Title"] - Freshify Admin</title>
+
+    <!-- BOOTSTRAP CSS -->
+    <link rel="stylesheet"
+          href="~/css/bootstrap.min.css"
+          asp-append-version="true" />
+
+    <!-- LOCAL BOOTSTRAP ICONS 1.13.2 -->
+    <link rel="stylesheet"
+          href="~/lib/bootstrap-icons/bootstrap-icons.min.css"
+          asp-append-version="true" />
+
+    <style>
+        body {
+            margin: 0;
+            background: #f4f7f5;
+            font-family: Arial, sans-serif;
+        }
+
+        .sidebar {
+            background: #14532d;
+            min-height: 100vh;
+            padding: 24px 15px;
+            color: white;
+        }
+
+        .sidebar-brand {
+            font-size: 26px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            padding-left: 12px;
+        }
+
+        .sidebar-brand i {
+            color: #86efac;
+            margin-right: 8px;
+        }
+
+        .admin-profile {
+            text-align: center;
+            padding: 20px 10px;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+        }
+
+        .admin-profile h6 {
+            margin-bottom: 4px;
+            font-weight: bold;
+            overflow-wrap: anywhere;
+        }
+
+        .admin-profile small {
+            color: #bbf7d0;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 13px 16px;
+            color: #dcfce7;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            transition: 0.2s;
+        }
+
+        .sidebar-menu a i {
+            font-size: 19px;
+            width: 24px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background: #22c55e;
+            color: white;
+        }
+
+        .sidebar-section {
+            color: #86efac;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin: 25px 0 12px 16px;
+        }
+
+        .main-content {
+            padding: 25px;
+            min-height: 100vh;
+        }
+
+        .topbar {
+            background: white;
+            padding: 18px 24px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+        }
+
+        .topbar h5 {
+            font-weight: bold;
+            color: #14532d;
+        }
+
+        .topbar-admin {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #334155;
+        }
+
+        .topbar-admin i {
+            font-size: 25px;
+            color: #16a34a;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 24px;
+            border-radius: 14px;
+            border: 1px solid #e5e7eb;
+            height: 100%;
+        }
+
+        .stat-card h3 {
+            font-weight: bold;
+            color: #166534;
+        }
+
+        .stat-card p {
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+
+        .dashboard-panel {
+            background: white;
+            border-radius: 14px;
+            padding: 24px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .logout-btn {
+            width: 100%;
+            text-align: left;
+            padding: 12px 16px;
+            border-radius: 8px;
+        }
+
+        .logout-btn i {
+            margin-right: 10px;
+        }
+
+        @@media (max-width: 767px) {
+            .sidebar {
+                min-height: auto;
+            }
+
+            .main-content {
+                padding: 15px;
+            }
+
+            .topbar {
+                padding: 15px;
+            }
+
+            .topbar-admin span {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container-fluid">
+    <div class="row">
+
+        <!-- ADMIN SIDEBAR -->
+        <aside class="col-lg-2 col-md-3 sidebar">
+
+            <!-- LOGO -->
+            <div class="sidebar-brand">
+                <i class="bi bi-basket2-fill"></i>
+                Freshify
+            </div>
+
+            <!-- ADMIN PROFILE -->
+            <div class="admin-profile">
+
+                <h6>@adminName</h6>
+
+                <small>
+                    <i class="bi bi-shield-check"></i>
+                    Administrator
+                </small>
+
+            </div>
+
+            <nav class="sidebar-menu">
+
+                <!-- MAIN MENU -->
+                <div class="sidebar-section">
+                    Main Menu
+                </div>
+
+                <!-- DASHBOARD -->
+                <a asp-controller="Admin"
+                   asp-action="Index"
+                   class="@(currentController == "Admin" ? "active" : "")">
+
+                    <i class="bi bi-speedometer2"></i>
+                    Dashboard
+                </a>
+
+                <!-- CATEGORIES -->
+                <a asp-controller="AdminCategories"
+                   asp-action="Index"
+                   class="@(currentController == "AdminCategories" ? "active" : "")">
+
+                    <i class="bi bi-grid"></i>
+                    Categories
+                </a>
+
+                <!-- PRODUCTS -->
+                <a asp-controller="AdminProducts"
+                   asp-action="Index"
+                   class="@(currentController == "AdminProducts" ? "active" : "")">
+
+                    <i class="bi bi-box-seam"></i>
+                    Products
+                </a>
+
+                <!-- ORDERS -->
+                <a asp-controller="AdminOrders"
+                   asp-action="Index"
+                   class="@(currentController == "AdminOrders" ? "active" : "")">
+
+                    <i class="bi bi-bag-check"></i>
+                    Orders
+                </a>
+
+                <!-- CUSTOMERS -->
+                <a asp-controller="AdminCustomers"
+                   asp-action="Index"
+                   class="@(currentController == "AdminCustomers" ? "active" : "")">
+
+                    <i class="bi bi-people"></i>
+                    Customers
+                </a>
+
+                <!-- REVIEWS -->
+                <a asp-controller="AdminReviews"
+                   asp-action="Index"
+                   class="@(currentController == "AdminReviews" ? "active" : "")">
+
+                    <i class="bi bi-star-half"></i>
+                    Reviews
+                </a>
+
+                <!-- ADMINISTRATION -->
+                <div class="sidebar-section">
+                    Administration
+                </div>
+
+                <!-- MANAGE ADMINS -->
+                <a asp-controller="AdminManage"
+                   asp-action="Index"
+                   class="@(currentController == "AdminManage" ? "active" : "")">
+
+                    <i class="bi bi-person-gear"></i>
+                    Manage Admins
+                </a>
+
+                <!-- ACCOUNT -->
+                <div class="sidebar-section">
+                    Account
+                </div>
+
+                <!-- MY PROFILE -->
+                <a asp-controller="AdminProfile"
+                   asp-action="Index"
+                   class="@(currentController == "AdminProfile" ? "active" : "")">
+
+                    <i class="bi bi-person-circle"></i>
+                    My Profile
+                </a>
+
+                <!-- LOGOUT -->
+                <form asp-controller="Account"
+                      asp-action="Logout"
+                      method="post">
+
+                    @Html.AntiForgeryToken()
+
+                    <button type="submit"
+                            class="btn btn-outline-light logout-btn">
+
+                        <i class="bi bi-box-arrow-right"></i>
+                        Logout
+                    </button>
+
+                </form>
+
+            </nav>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="col-lg-10 col-md-9 main-content">
+
+            <!-- TOP BAR -->
+            <div class="topbar d-flex justify-content-between
+                        align-items-center">
+
+                <h5 class="mb-0">
+                    <i class="bi bi-speedometer2 me-2"></i>
+                    @ViewData["Title"]
+                </h5>
+
+            </div>
+
+            <!-- PAGE CONTENT -->
+            @RenderBody()
+
+        </main>
+
+    </div>
+</div>
+
+<!-- BOOTSTRAP JS -->
+<script src="~/js/bootstrap.bundle.min.js"
+        asp-append-version="true"></script>
+
+@await RenderSectionAsync("Scripts", required: false)
+
+</body>
+</html>

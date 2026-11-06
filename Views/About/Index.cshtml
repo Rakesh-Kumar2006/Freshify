@@ -1,0 +1,314 @@
+﻿@{
+    ViewData["Title"] = "About Us";
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+}
+
+@section Styles {
+    <style>
+        .about-hero {
+            background: #e8f2e9;
+            border: 1px solid #dce9dd;
+            border-radius: 18px;
+            padding: 45px;
+        }
+
+        .about-label {
+            color: #206543;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .about-hero h1 {
+            color: #244b32;
+            font-size: clamp(30px, 4vw, 44px);
+            font-weight: 800;
+            line-height: 1.2;
+        }
+
+        .about-description {
+            color: #647568;
+            font-size: 15px;
+            line-height: 1.9;
+        }
+
+        .about-art {
+            width: 210px;
+            height: 210px;
+            margin: auto;
+            border-radius: 50%;
+            background: white;
+            display: grid;
+            place-items: center;
+            font-size: 95px;
+        }
+
+        .about-card {
+            height: 100%;
+            background: white;
+            border: 1px solid #e0e7df;
+            border-radius: 14px;
+            padding: 26px;
+        }
+
+            .about-card h2,
+            .about-card h3 {
+                color: #244b32;
+                font-weight: 750;
+            }
+
+        .about-icon {
+            width: 52px;
+            height: 52px;
+            background: #edf5ee;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            margin-bottom: 18px;
+            font-size: 26px;
+        }
+
+        .about-section-title {
+            color: #244b32;
+            font-size: 26px;
+            font-weight: 800;
+        }
+
+        .about-step {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: #206543;
+            color: white;
+            display: grid;
+            place-items: center;
+            font-weight: 700;
+            margin-bottom: 18px;
+        }
+
+        .about-cta {
+            background: white;
+            border: 1px solid #e0e7df;
+            border-radius: 16px;
+            padding: 30px;
+        }
+
+        @@media (max-width: 575px) {
+            .about-hero {
+                padding: 26px;
+            }
+
+            .about-art {
+                width: 150px;
+                height: 150px;
+                font-size: 70px;
+            }
+
+            .about-card,
+            .about-cta {
+                padding: 22px;
+            }
+        }
+    </style>
+}
+
+<div class="container py-4">
+
+    <!-- INTRODUCTION -->
+    <section class="about-hero mb-4"
+             aria-labelledby="aboutTitle">
+        <div class="row align-items-center g-4">
+            <div class="col-md-8">
+                <p class="about-label mb-2">About Freshify</p>
+
+                <h1 id="aboutTitle" class="mb-3">
+                    Everyday groceries.<br />
+                    Simple shopping.
+                </h1>
+
+                <p class="about-description mb-4">
+                    Freshify brings groceries and household essentials
+                    together in one place. Browse categories, compare
+                    products, and order what you need for your home.
+                </p>
+
+                <a asp-controller="Products"
+                   asp-action="Index"
+                   class="btn btn-success px-4">
+                    Explore Products
+                </a>
+            </div>
+
+            <div class="col-md-4">
+                <div class="about-art" aria-hidden="true">
+                    🛒
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- OUR STORY AND MISSION -->
+    <section class="row g-4 mb-5">
+        <div class="col-md-6">
+            <div class="about-card">
+                <h2 class="h5 mb-3">Who We Are</h2>
+
+                <p class="about-description mb-0">
+                    Freshify is an online grocery store designed to
+                    make everyday shopping easier. From fruits and
+                    vegetables to pantry staples, snacks, and drinks,
+                    you can explore products without moving between
+                    different shops.
+                </p>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="about-card">
+                <h2 class="h5 mb-3">Our Mission</h2>
+
+                <p class="about-description mb-0">
+                    Our goal is to offer a straightforward grocery
+                    shopping experience with clear product information,
+                    easy ordering, and convenient access to your
+                    account and order history.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="mb-5" aria-labelledby="featuresTitle">
+        <div class="text-center mb-4">
+            <h2 id="featuresTitle" class="about-section-title">
+                Shopping Made Easier
+            </h2>
+
+            <p class="text-muted mb-0">
+                Useful features for your everyday grocery needs.
+            </p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-sm-6 col-lg-3">
+                <div class="about-card">
+                    <div class="about-icon" aria-hidden="true">🥦</div>
+
+                    <h3 class="h6 mb-2">Browse Categories</h3>
+
+                    <p class="about-description small mb-0">
+                        Explore fresh produce, dairy, snacks,
+                        beverages, and kitchen essentials.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-lg-3">
+                <div class="about-card">
+                    <div class="about-icon" aria-hidden="true">🛍️</div>
+
+                    <h3 class="h6 mb-2">Easy Ordering</h3>
+
+                    <p class="about-description small mb-0">
+                        View product details, choose quantities,
+                        and manage your shopping cart.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-lg-3">
+                <div class="about-card">
+                    <div class="about-icon" aria-hidden="true">💵</div>
+
+                    <h3 class="h6 mb-2">Cash on Delivery</h3>
+
+                    <p class="about-description small mb-0">
+                        Place your order online and pay when
+                        your order is delivered.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-lg-3">
+                <div class="about-card">
+                    <div class="about-icon" aria-hidden="true">⭐</div>
+
+                    <h3 class="h6 mb-2">Share Your Feedback</h3>
+
+                    <p class="about-description small mb-0">
+                        Review products and orders to tell us
+                        about your shopping experience.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="mb-5" aria-labelledby="stepsTitle">
+        <h2 id="stepsTitle"
+            class="about-section-title text-center mb-4">
+            How It Works
+        </h2>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="about-card">
+                    <div class="about-step" aria-hidden="true">1</div>
+
+                    <h3 class="h6 mb-2">Choose Your Products</h3>
+
+                    <p class="about-description mb-0">
+                        Browse the catalog or search for the
+                        groceries you need.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="about-card">
+                    <div class="about-step" aria-hidden="true">2</div>
+
+                    <h3 class="h6 mb-2">Confirm Your Order</h3>
+
+                    <p class="about-description mb-0">
+                        Review your cart and enter your delivery
+                        details at checkout.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="about-card">
+                    <div class="about-step" aria-hidden="true">3</div>
+
+                    <h3 class="h6 mb-2">Pay on Delivery</h3>
+
+                    <p class="about-description mb-0">
+                        Check your order status in My Orders
+                        and pay when it arrives.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SHOPPING LINK -->
+    <section class="about-cta text-center">
+        <h2 class="h4 fw-bold mb-2">
+            Ready to fill your basket?
+        </h2>
+
+        <p class="text-muted mb-4">
+            Explore Freshify and find your everyday essentials.
+        </p>
+
+        <a asp-controller="Products"
+           asp-action="Index"
+           class="btn btn-success px-4">
+            Start Shopping
+        </a>
+    </section>
+
+</div>

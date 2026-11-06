@@ -1,0 +1,232 @@
+﻿@model Freshify.ViewModels.AdminReviewRowViewModel
+
+@{
+    ViewData["Title"] = "Review Details";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+
+    <!-- PAGE HEADER -->
+    <div class="d-flex justify-content-between
+        align-items-center flex-wrap gap-2 mb-4">
+
+        <div>
+            <h3 class="fw-bold mb-1">
+                <i class="bi bi-chat-square-text-fill text-success me-2"></i>
+                Review Details
+            </h3>
+
+            <p class="text-muted mb-0">
+                View complete customer review and feedback.
+            </p>
+        </div>
+
+        <a asp-controller="AdminReviews"
+           asp-action="Index"
+           class="btn btn-outline-secondary">
+
+            <i class="bi bi-arrow-left me-1"></i>
+            Back to Reviews
+        </a>
+
+    </div>
+
+    <div class="row justify-content-center">
+
+        <div class="col-12 col-lg-10 col-xl-9">
+
+            <div class="dashboard-panel p-4">
+
+                <!-- REVIEW HEADER -->
+                <div class="d-flex justify-content-between
+                    align-items-center flex-wrap gap-2 mb-4">
+
+                    <div>
+                        <h5 class="fw-bold mb-1">
+                            <i class="bi bi-star-fill text-warning me-2"></i>
+                            Customer Review
+                        </h5>
+
+                        <span class="text-muted">
+                            Review ID: #@Model.ReviewId
+                        </span>
+                    </div>
+
+                    <span class="badge bg-success fs-6">
+                        @(Model.FeedbackType ?? "Feedback")
+                    </span>
+
+                </div>
+
+                <!-- CUSTOMER AND PRODUCT DETAILS -->
+                <h6 class="fw-bold text-success mb-3">
+                    <i class="bi bi-person-lines-fill me-2"></i>
+                    Review Information
+                </h6>
+
+                <div class="table-responsive">
+
+                    <table class="table table-bordered align-middle">
+
+                        <tbody>
+
+                            <tr>
+                                <th style="width:35%;">
+                                    Review ID
+                                </th>
+                                <td>#@Model.ReviewId</td>
+                            </tr>
+
+                            <tr>
+                                <th>Customer Name</th>
+                                <td>@Model.CustomerName</td>
+                            </tr>
+
+                            <tr>
+                                <th>Product Name</th>
+                                <td>@Model.ProductName</td>
+                            </tr>
+
+                            <tr>
+                                <th>Order ID</th>
+                                <td>
+                                    @(Model.OrderId?.ToString() ?? "N/A")
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>Feedback Type</th>
+                                <td>
+                                    <span class="badge bg-light text-dark border">
+                                        @(Model.FeedbackType ?? "N/A")
+                                    </span>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>Review Date</th>
+                                <td>
+                                    @Model.CreatedAt.ToString("dd MMM yyyy, hh:mm tt")
+                                </td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- RATING -->
+                <h6 class="fw-bold text-success mt-4 mb-3">
+                    <i class="bi bi-star-half me-2"></i>
+                    Customer Rating
+                </h6>
+
+                <div class="border rounded p-3 mb-4">
+
+                    @if (Model.Rating.HasValue)
+                    {
+                        <div class="d-flex align-items-center gap-3">
+
+                            <h3 class="fw-bold text-warning mb-0">
+                                @Model.Rating.Value/5
+                            </h3>
+
+                            <div class="text-warning fs-4">
+
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    if (i <= Model.Rating.Value)
+                                    {
+                                        <i class="bi bi-star-fill"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-star"></i>
+                                    }
+                                }
+
+                            </div>
+
+                        </div>
+                    }
+                    else
+                    {
+                        <span class="text-muted">
+                            No rating provided.
+                        </span>
+                    }
+
+                </div>
+
+                <!-- REVIEW TITLE -->
+                <h6 class="fw-bold text-success mb-3">
+                    <i class="bi bi-card-heading me-2"></i>
+                    Review Title
+                </h6>
+
+                <div class="border rounded p-3 mb-4">
+
+                    <h5 class="fw-semibold mb-0">
+                        @(string.IsNullOrWhiteSpace(Model.ReviewTitle)
+                            ? "No review title"
+                            : Model.ReviewTitle)
+                    </h5>
+
+                </div>
+
+                <!-- FULL COMMENT -->
+                <h6 class="fw-bold text-success mb-3">
+                    <i class="bi bi-chat-left-text me-2"></i>
+                    Customer Comment
+                </h6>
+
+                <div class="border rounded p-3 mb-4"
+                     style="min-height:120px;">
+
+                    <p class="mb-0"
+                       style="white-space:pre-wrap; overflow-wrap:anywhere;">
+                        @(string.IsNullOrWhiteSpace(Model.Comment)
+                            ? "No comment provided."
+                            : Model.Comment)
+                    </p>
+
+                </div>
+
+                <!-- ACTIONS -->
+                <div class="d-flex justify-content-between
+                    align-items-center flex-wrap gap-2">
+
+                    <a asp-controller="AdminReviews"
+                       asp-action="Index"
+                       class="btn btn-outline-secondary">
+
+                        <i class="bi bi-arrow-left me-1"></i>
+                        Back
+                    </a>
+
+                    <form asp-controller="AdminReviews"
+                          asp-action="Delete"
+                          asp-route-id="@Model.ReviewId"
+                          method="post"
+                          onsubmit="return confirm('Are you sure you want to delete this review?');">
+
+                        @Html.AntiForgeryToken()
+
+                        <button type="submit"
+                                class="btn btn-outline-danger">
+
+                            <i class="bi bi-trash-fill me-1"></i>
+                            Delete Review
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

@@ -1,0 +1,349 @@
+﻿@{
+    ViewData["Title"] = "User Login";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1" />
+
+    <title>User Login - Freshify</title>
+
+    <link rel="stylesheet" href="~/css/bootstrap.min.css" />
+
+    <style>
+            * {
+                box-sizing: border-box;
+            }
+
+            body {
+                margin: 0;
+                min-height: 100vh;
+                min-height: 100dvh;
+                background: #f1f5ef;
+                color: #263d30;
+                font-family: "Segoe UI", Arial, sans-serif;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 24px;
+            }
+
+            .login-shell {
+                width: 100%;
+                max-width: 900px;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                background: white;
+                border: 1px solid #e0e8dc;
+                border-radius: 24px;
+                overflow: hidden;
+                box-shadow: 0 18px 60px rgba(31, 71, 45, .08);
+            }
+
+            .brand-panel {
+                background: #20583d;
+                color: white;
+                padding: 45px;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+            }
+
+            .brand {
+                color: white;
+                font-size: 30px;
+                font-weight: 800;
+                text-decoration: none;
+                letter-spacing: -1px;
+            }
+
+                .brand:hover {
+                    color: #e3efce;
+                }
+
+                .brand span {
+                    color: #d2e6aa;
+                }
+
+            .brand-panel h2 {
+                font-size: 36px;
+                font-weight: 750;
+                line-height: 1.2;
+                margin-bottom: 18px;
+            }
+
+            .brand-panel p {
+                color: #d0e0d4;
+                font-size: 14px;
+                line-height: 1.8;
+            }
+
+            .grocery-art {
+                font-size: 66px;
+                margin: 32px 0 20px;
+            }
+
+            .brand-note {
+                border-top: 1px solid #ffffff30;
+                padding-top: 20px;
+                color: #d0e0d4;
+                font-size: 12px;
+            }
+
+            .form-panel {
+                padding: 45px 38px;
+            }
+
+            .back-link {
+                display: inline-block;
+                color: #647568;
+                text-decoration: none;
+                font-size: 13px;
+                margin-bottom: 32px;
+            }
+
+                .back-link:hover {
+                    color: #20583d;
+                }
+
+            .form-panel h1 {
+                font-size: 28px;
+                font-weight: 750;
+                margin-bottom: 8px;
+            }
+
+            .subtitle {
+                color: #748076;
+                font-size: 14px;
+                margin-bottom: 28px;
+            }
+
+            .form-label {
+                font-size: 13px;
+                font-weight: 650;
+            }
+
+            .form-control {
+                padding: 12px 14px;
+                border-color: #dce4d9;
+                border-radius: 9px;
+                font-size: 14px;
+            }
+
+                .form-control:focus {
+                    border-color: #518463;
+                    box-shadow: 0 0 0 3px rgba(32, 88, 61, .1);
+                }
+
+            .password-toggle {
+                border: 1px solid #dce4d9;
+                color: #20583d;
+                background: #f8faf6;
+                font-size: 12px;
+                padding: 0 12px;
+                border-radius: 0 9px 9px 0;
+            }
+
+            .login-button {
+                width: 100%;
+                background: #20583d;
+                color: white;
+                border: 0;
+                border-radius: 9px;
+                padding: 13px;
+                font-size: 14px;
+                font-weight: 650;
+                margin-top: 8px;
+            }
+
+                .login-button:hover {
+                    background: #17442e;
+                }
+
+            .register-line {
+                text-align: center;
+                border-top: 1px solid #edf0e9;
+                margin-top: 28px;
+                padding-top: 22px;
+                font-size: 13px;
+                color: #748076;
+            }
+
+                .register-line a {
+                    color: #20583d;
+                    font-weight: 700;
+                    text-decoration: none;
+                }
+
+                    .register-line a:hover {
+                        text-decoration: underline;
+                    }
+
+            @@media (max-width: 767px) {
+                body {
+                    padding: 18px;
+                }
+
+                .login-shell {
+                    max-width: 440px;
+                    grid-template-columns: 1fr;
+                }
+
+                .brand-panel {
+                    padding: 24px 28px;
+                }
+
+                    .brand-panel h2,
+                    .brand-panel p,
+                    .grocery-art,
+                    .brand-note {
+                        display: none;
+                    }
+
+                .form-panel {
+                    padding: 28px;
+                }
+
+                .back-link {
+                    margin-bottom: 24px;
+                }
+            }
+    </style>
+</head>
+
+<body>
+    <div class="login-shell">
+
+        <!-- BRAND SECTION -->
+        <aside class="brand-panel">
+            <a asp-controller="Home"
+               asp-action="Index"
+               class="brand">
+                Freshify<span>.</span>
+            </a>
+
+            <div>
+                <div class="grocery-art" aria-hidden="true">
+                    🥬 🍎 🥕
+                </div>
+
+                <h2>
+                    Fresh groceries.<br />
+                    Happy homes.
+                </h2>
+
+                <p>
+                    Your everyday essentials, favourite snacks,
+                    and kitchen staples — all in one place.
+                </p>
+            </div>
+
+            <div class="brand-note">
+                A little freshness for every day.
+            </div>
+        </aside>
+
+        <!-- LOGIN FORM -->
+        <main class="form-panel">
+            <a asp-controller="Home"
+               asp-action="Index"
+               class="back-link">
+                ← Back to website
+            </a>
+
+            <h1>Welcome back</h1>
+
+            <p class="subtitle">
+                Login to your Freshify account.
+            </p>
+
+            <form asp-controller="CustomerAccount"
+                  asp-action="Login"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                @if (ViewBag.Error != null)
+                {
+                    <div class="alert alert-danger small" role="alert">
+                        @ViewBag.Error
+                    </div>
+                }
+
+                <div asp-validation-summary="ModelOnly"
+                     class="text-danger small mb-3"></div>
+
+                <div class="mb-3">
+                    <label for="email" class="form-label">
+                        Email Address
+                    </label>
+
+                    <input type="email"
+                           id="email"
+                           name="email"
+                           value="@ViewBag.Email"
+                           class="form-control"
+                           placeholder="Enter your email"
+                           maxlength="150"
+                           autocomplete="username"
+                           required />
+                </div>
+
+                <div class="mb-4">
+                    <label for="password" class="form-label">
+                        Password
+                    </label>
+
+                    <div class="input-group">
+                        <input type="password"
+                               id="password"
+                               name="password"
+                               class="form-control"
+                               placeholder="Enter your password"
+                               autocomplete="current-password"
+                               required />
+
+                        <button type="button"
+                                id="togglePassword"
+                                class="password-toggle"
+                                aria-controls="password"
+                                aria-pressed="false">
+                            Show
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="login-button">
+                    Login →
+                </button>
+
+                <div class="register-line">
+                    Don't have an account?
+                    <a asp-controller="CustomerAccount"
+                       asp-action="Register">
+                        Register
+                    </a>
+                </div>
+
+            </form>
+        </main>
+
+    </div>
+
+    <script>
+            document.getElementById("togglePassword")
+                .addEventListener("click", function () {
+                    const password = document.getElementById("password");
+                    const show = password.type === "password";
+
+                    password.type = show ? "text" : "password";
+                    this.textContent = show ? "Hide" : "Show";
+                    this.setAttribute("aria-pressed", String(show));
+                });
+    </script>
+</body>
+</html>

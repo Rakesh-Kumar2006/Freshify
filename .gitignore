@@ -1,0 +1,34 @@
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build output
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio generated files
+*.cache
+*.log
+
+# User-specific files
+*.csproj.user
+
+# ASP.NET Core
+appsettings.Development.json
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Database files (if generated locally)
+*.mdf
+*.ldf
+
+# Operating system
+.DS_Store
+Thumbs.db

@@ -1,0 +1,317 @@
+﻿@model Freshify.ViewModels.CategoryFormViewModel
+
+@{
+    ViewData["Title"] = "Edit Category";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-9">
+
+            <div class="dashboard-panel">
+
+                <!-- PAGE TITLE -->
+                <h4 class="fw-bold mb-2">
+                    <i class="bi bi-pencil-square text-success me-2"></i>
+                    Edit Category
+                </h4>
+
+                <p class="text-muted mb-4">
+                    Update your grocery category details and image.
+                </p>
+
+                <!-- EDIT CATEGORY FORM -->
+                <form asp-controller="AdminCategories"
+                      asp-action="Edit"
+                      asp-route-id="@Model.CategoryId"
+                      method="post"
+                      enctype="multipart/form-data">
+
+                    @Html.AntiForgeryToken()
+
+                    <!-- CATEGORY ID -->
+                    <input type="hidden"
+                           asp-for="CategoryId" />
+
+                    <!-- VALIDATION SUMMARY -->
+                    <div asp-validation-summary="ModelOnly"
+                         class="text-danger mb-3">
+                    </div>
+
+                    <!-- CATEGORY NAME -->
+                    <div class="mb-3">
+
+                        <label asp-for="CategoryName"
+                               class="form-label fw-semibold">
+                            Category Name
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        <input asp-for="CategoryName"
+                               class="form-control"
+                               maxlength="100"
+                               placeholder="Enter category name"
+                               required />
+
+                        <span asp-validation-for="CategoryName"
+                              class="text-danger small"></span>
+
+                    </div>
+
+                    <!-- DESCRIPTION -->
+                    <div class="mb-4">
+
+                        <label asp-for="Description"
+                               class="form-label fw-semibold">
+                            Description
+                        </label>
+
+                        <textarea asp-for="Description"
+                                  class="form-control"
+                                  rows="4"
+                                  maxlength="500"
+                                  placeholder="Enter category description"></textarea>
+
+                        <span asp-validation-for="Description"
+                              class="text-danger small"></span>
+
+                    </div>
+
+                    <!-- CATEGORY IMAGE -->
+                    <div class="mb-4">
+
+                        <label class="form-label fw-semibold">
+                            Category Image
+                            <span class="text-muted fw-normal">
+                                (Optional)
+                            </span>
+                        </label>
+
+                        <!-- CURRENT IMAGE / PREVIEW -->
+                        <div class="mb-3">
+
+                            <div id="imagePreviewContainer"
+                                 class="position-relative d-inline-block">
+
+                                @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
+                                {
+                                    <img id="categoryImagePreview"
+                                         src="@Url.Content(Model.ImageUrl)"
+                                         alt="@Model.CategoryName"
+                                         class="rounded border shadow-sm"
+                                         style="width:200px;height:160px;object-fit:cover;" />
+                                }
+                                else
+                                {
+                                    <div id="noImagePlaceholder"
+                                         class="bg-light border rounded d-flex align-items-center justify-content-center"
+                                         style="width:200px;height:160px;">
+
+                                        <div class="text-center text-muted">
+                                            <i class="bi bi-image fs-1"></i>
+                                            <p class="small mb-0">
+                                                No Image Uploaded
+                                            </p>
+                                        </div>
+
+                                    </div>
+
+                                    <img id="categoryImagePreview"
+                                         alt="Category image preview"
+                                         class="rounded border shadow-sm"
+                                         style="width:200px;height:160px;object-fit:cover;display:none;" />
+                                }
+
+                            </div>
+
+                        </div>
+
+                        <!-- UPLOAD NEW IMAGE -->
+                        <label asp-for="ImageFile"
+                               class="form-label fw-semibold">
+                            Replace Category Image
+                        </label>
+
+                        <input asp-for="ImageFile"
+                               type="file"
+                               class="form-control"
+                               accept=".jpg,.jpeg,.png,.webp"
+                               onchange="previewCategoryImage(event)" />
+
+                        <span asp-validation-for="ImageFile"
+                              class="text-danger small"></span>
+
+                        <div class="form-text">
+                            JPG, JPEG, PNG or WEBP. Maximum 5 MB.
+                        </div>
+
+                        <div class="form-text text-success">
+                            <i class="bi bi-info-circle me-1"></i>
+                            If you do not select a new image,
+                            the existing image will remain unchanged.
+                        </div>
+
+                        <!-- CANCEL SELECTED IMAGE -->
+                        <button type="button"
+                                id="removeSelectedImageBtn"
+                                class="btn btn-sm btn-outline-danger mt-3"
+                                onclick="removeSelectedImage()"
+                                style="display:none;">
+
+                            <i class="bi bi-x-circle me-1"></i>
+                            Cancel Selected Image
+                        </button>
+
+                    </div>
+
+                    <!-- ACTION BUTTONS -->
+                    <div class="d-flex gap-2 flex-wrap">
+
+                        <button type="submit"
+                                class="btn btn-success">
+
+                            <i class="bi bi-check-circle me-1"></i>
+                            Update Category
+                        </button>
+
+                        <a asp-controller="AdminCategories"
+                           asp-action="Index"
+                           class="btn btn-outline-secondary">
+
+                            <i class="bi bi-arrow-left me-1"></i>
+                            Back
+                        </a>
+
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+
+    <script>
+
+            // STORE EXISTING CATEGORY IMAGE
+            const existingImageUrl =
+                        @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                                        Model.ImageUrl ?? ""
+));
+
+            // PREVIEW NEW CATEGORY IMAGE
+            function previewCategoryImage(event) {
+
+                const input = event.target;
+                const file = input.files[0];
+
+                const preview =
+                    document.getElementById("categoryImagePreview");
+
+                const placeholder =
+                    document.getElementById("noImagePlaceholder");
+
+                const removeBtn =
+                    document.getElementById("removeSelectedImageBtn");
+
+                if (!file) {
+                    removeSelectedImage();
+                    return;
+                }
+
+                // VALIDATE FILE EXTENSION
+                const allowedExtensions = [
+                    ".jpg",
+                    ".jpeg",
+                    ".png",
+                    ".webp"
+                ];
+
+                const fileName = file.name.toLowerCase();
+
+                const validExtension = allowedExtensions.some(
+                    extension => fileName.endsWith(extension)
+                );
+
+                if (!validExtension) {
+                    alert("Only JPG, PNG and WEBP images are allowed.");
+                    removeSelectedImage();
+                    return;
+                }
+
+                // VALIDATE FILE SIZE
+                if (file.size > 5 * 1024 * 1024) {
+                    alert("Image size cannot exceed 5 MB.");
+                    removeSelectedImage();
+                    return;
+                }
+
+                if (file.size === 0) {
+                    alert("Please select a valid image.");
+                    removeSelectedImage();
+                    return;
+                }
+
+                // IMAGE PREVIEW
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+
+                    preview.src = e.target.result;
+
+                    preview.style.display = "block";
+
+                    if (placeholder) {
+                        placeholder.style.display = "none";
+                    }
+
+                    removeBtn.style.display = "inline-block";
+                };
+
+                reader.readAsDataURL(file);
+            }
+
+            // CANCEL NEW IMAGE SELECTION
+            function removeSelectedImage() {
+
+                const input =
+                    document.getElementById("ImageFile");
+
+                const preview =
+                    document.getElementById("categoryImagePreview");
+
+                const placeholder =
+                    document.getElementById("noImagePlaceholder");
+
+                const removeBtn =
+                    document.getElementById("removeSelectedImageBtn");
+
+                // CLEAR NEW FILE
+                input.value = "";
+
+                // RESTORE EXISTING IMAGE
+                if (existingImageUrl) {
+
+                    preview.src = existingImageUrl;
+                    preview.style.display = "block";
+
+                } else {
+
+                    preview.removeAttribute("src");
+                    preview.style.display = "none";
+
+                    if (placeholder) {
+                        placeholder.style.display = "flex";
+                    }
+                }
+
+                removeBtn.style.display = "none";
+            }
+
+    </script>
+
+    <partial name="_ValidationScriptsPartial" />
+}

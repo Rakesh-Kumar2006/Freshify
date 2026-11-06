@@ -1,0 +1,252 @@
+﻿@using System.Linq
+@model Freshify.Models.Order
+
+@{
+    ViewData["Title"] = "Order Successful";
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+
+    var payment = Model.Payments.FirstOrDefault(
+        p => p.PaymentMethod == "CashOnDelivery"
+    );
+
+    var paymentStatus = payment?.PaymentStatus ?? "Pending";
+}
+
+@section Styles {
+    <style>
+        .success-card {
+            max-width: 850px;
+            margin: auto;
+            background: white;
+            border: 1px solid #e0e7df;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(32, 88, 61, .05);
+        }
+
+        .success-header {
+            background: #e8f2e9;
+            padding: 35px 24px;
+            text-align: center;
+        }
+
+        .success-icon {
+            width: 70px;
+            height: 70px;
+            margin: 0 auto 18px;
+            border-radius: 50%;
+            background: #206543;
+            color: white;
+            display: grid;
+            place-items: center;
+            font-size: 36px;
+        }
+
+        .success-body {
+            padding: 28px;
+        }
+
+        .order-label {
+            font-size: 12px;
+            color: #748076;
+            margin-bottom: 5px;
+        }
+
+        .order-value {
+            font-size: 15px;
+            font-weight: 700;
+            overflow-wrap: anywhere;
+        }
+
+        .payment-box {
+            background: #fff9e9;
+            border: 1px solid #f0dfb2;
+            border-radius: 10px;
+            padding: 18px;
+        }
+
+        .delivery-box {
+            border: 1px solid #e0e7df;
+            border-radius: 10px;
+            padding: 18px;
+        }
+
+        .delivery-address {
+            white-space: pre-line;
+            overflow-wrap: anywhere;
+        }
+
+        .order-table {
+            min-width: 480px;
+        }
+
+        .order-total {
+            color: #206543;
+            font-size: 22px;
+            font-weight: 800;
+        }
+
+        @@media (max-width: 575px) {
+            .success-body {
+                padding: 20px;
+            }
+
+            .success-header {
+                padding: 28px 20px;
+            }
+        }
+    </style>
+}
+
+<div class="container py-4">
+    <div class="success-card">
+
+        <!-- SUCCESS MESSAGE -->
+        <div class="success-header">
+            <div class="success-icon" aria-hidden="true">✓</div>
+
+            <h1 class="h3 fw-bold text-success mb-2">
+                Order Placed Successfully!
+            </h1>
+
+            <p class="text-muted mb-0">
+                Thank you for shopping with Freshify.
+                Your order has been received.
+            </p>
+        </div>
+
+        <div class="success-body">
+
+            <!-- ORDER INFORMATION -->
+            <div class="row g-3 mb-4">
+                <div class="col-6 col-md-3">
+                    <div class="order-label">Order Number</div>
+                    <div class="order-value">#@Model.OrderId</div>
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <div class="order-label">Order Date</div>
+                    <div class="order-value">
+                        @Model.OrderDate.ToString("dd MMM yyyy")
+                    </div>
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <div class="order-label">Order Status</div>
+                    <div class="order-value">@Model.OrderStatus</div>
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <div class="order-label">Payment Status</div>
+                    <div class="order-value">@paymentStatus</div>
+                </div>
+            </div>
+
+            <!-- CASH ON DELIVERY -->
+            <div class="payment-box mb-4">
+                <h2 class="h6 fw-bold mb-2">
+                    Payment Method: Cash on Delivery
+                </h2>
+
+                @if (paymentStatus == "Pending")
+                {
+                    <p class="small mb-0">
+                        No payment has been collected yet.
+                        Please pay
+                        <strong>₹@Model.TotalAmount.ToString("N2")</strong>
+                        when your order is delivered.
+                    </p>
+                }
+                else
+                {
+                    <p class="small mb-0">
+                        Payment status: <strong>@paymentStatus</strong>.
+                        Order amount:
+                        <strong>₹@Model.TotalAmount.ToString("N2")</strong>.
+                    </p>
+                }
+            </div>
+
+            <!-- DELIVERY DETAILS -->
+            <div class="delivery-box mb-4">
+                <h2 class="h6 fw-bold mb-3">Delivery Details</h2>
+
+                <p class="fw-semibold mb-1">
+                    @Model.DeliveryName
+                </p>
+
+                <p class="small text-muted mb-2">
+                    Phone: @Model.DeliveryPhone
+                </p>
+
+                <div class="delivery-address">@Model.DeliveryAddress</div>
+
+                <p class="small text-muted mt-1 mb-0">
+                    @Model.DeliveryCity, @Model.DeliveryState
+                    — @Model.DeliveryPostalCode<br />
+                    @Model.DeliveryCountry
+                </p>
+            </div>
+
+            <!-- ORDER ITEMS -->
+            <h2 class="h5 fw-bold mb-3">Your Ordered Products</h2>
+
+            <div class="table-responsive">
+                <table class="table align-middle order-table">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">Product</th>
+                            <th scope="col">Qty</th>
+                            <th scope="col">Unit Price</th>
+                            <th scope="col" class="text-end">Subtotal</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var item in Model.OrderItems)
+                        {
+                            <tr>
+                                <td>
+                                    @(item.Product?.Name
+                                        ?? $"Product #{item.ProductId}")
+                                </td>
+                                <td>@item.Quantity</td>
+                                <td>₹@item.UnitPrice.ToString("N2")</td>
+                                <td class="text-end">
+                                    ₹@item.Subtotal.ToString("N2")
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+
+                    <tfoot>
+                        <tr>
+                            <th colspan="3" scope="row">
+                                Total Amount
+                            </th>
+                            <td class="text-end order-total">
+                                ₹@Model.TotalAmount.ToString("N2")
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <!-- ACTIONS -->
+            <div class="d-flex justify-content-center flex-wrap gap-2 mt-4">
+                <a asp-controller="Products"
+                   asp-action="Index"
+                   class="btn btn-success px-4">
+                    Continue Shopping
+                </a>
+
+                <a asp-controller="Home"
+                   asp-action="Index"
+                   class="btn btn-outline-success px-4">
+                    Back to Home
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>

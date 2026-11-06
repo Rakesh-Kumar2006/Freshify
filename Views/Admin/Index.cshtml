@@ -1,0 +1,122 @@
+﻿@model Freshify.ViewModels.AdminDashboardViewModel
+
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="mb-4">
+    <h3 class="fw-bold">Dashboard Overview</h3>
+    <p class="text-muted">
+        Welcome to Freshify Grocery Store Management.
+    </p>
+</div>
+
+<div class="row g-4 mb-4">
+
+    <div class="col-lg-3 col-sm-6">
+        <div class="stat-card">
+            <p>Total Customers</p>
+            <h3>@Model.TotalCustomers</h3>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-sm-6">
+        <div class="stat-card">
+            <p>Total Products</p>
+            <h3>@Model.TotalProducts</h3>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-sm-6">
+        <div class="stat-card">
+            <p>Total Orders</p>
+            <h3>@Model.TotalOrders</h3>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-sm-6">
+        <div class="stat-card">
+            <p>Order Value (Non-Cancelled)</p>
+            <h3>
+                ₹@Model.TotalSales.ToString("N2")
+            </h3>
+        </div>
+    </div>
+
+</div>
+
+<div class="row g-4 mb-4">
+
+    <div class="col-md-6">
+        <div class="stat-card">
+            <p>Pending Orders</p>
+            <h3>@Model.PendingOrders</h3>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="stat-card">
+            <p>Low Stock Products</p>
+            <h3>@Model.LowStockProducts</h3>
+        </div>
+    </div>
+
+</div>
+
+<div class="dashboard-panel">
+
+    <h5 class="fw-bold mb-3">
+        Recent Orders
+    </h5>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+
+            <thead class="table-light">
+                <tr>
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (Model.RecentOrders.Any())
+                {
+                    foreach (var order in Model.RecentOrders)
+                    {
+                        <tr>
+                            <td>#@order.OrderId</td>
+                            <td>@order.CustomerName</td>
+                            <td>
+                                @order.OrderDate.ToString("dd MMM yyyy")
+                            </td>
+                            <td>
+                                ₹@order.TotalAmount.ToString("N2")
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary">
+                                    @order.OrderStatus
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="5"
+                            class="text-center text-muted py-4">
+                            No orders found.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+
+        </table>
+    </div>
+
+</div>

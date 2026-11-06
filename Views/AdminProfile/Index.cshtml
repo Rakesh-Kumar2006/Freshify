@@ -1,0 +1,384 @@
+﻿@model Freshify.ViewModels.AdminProfilePageViewModel
+
+@{
+    ViewData["Title"] = "My Profile";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    string imageUrl = string.IsNullOrWhiteSpace(Model.Profile.ImageUrl)
+        ? ""
+        : Url.Content(Model.Profile.ImageUrl);
+}
+
+<div class="container-fluid">
+
+    <!-- PAGE HEADER -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+        <div>
+            <h3 class="fw-bold mb-1">
+                <i class="bi bi-person-circle text-success me-2"></i>
+                My Profile
+            </h3>
+
+            <p class="text-muted mb-0">
+                Manage your administrator account information.
+            </p>
+        </div>
+
+        <span class="badge bg-success fs-6">
+            <i class="bi bi-shield-check me-1"></i>
+            Administrator
+        </span>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            @TempData["Success"]
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            @TempData["Error"]
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- ACCOUNT SUMMARY -->
+    <div class="dashboard-panel p-4 mb-4">
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+
+            <div>
+                @if (!string.IsNullOrWhiteSpace(imageUrl))
+                {
+                    <img src="@imageUrl"
+                         alt="Administrator profile"
+                         id="summaryProfileImage"
+                         class="rounded-circle"
+                         style="width:90px;height:90px;object-fit:cover;border:3px solid #22c55e;"
+                         onerror="this.style.display='none';document.getElementById('summaryDefaultAvatar').style.display='flex';" />
+                }
+
+                <div id="summaryDefaultAvatar"
+                     class="rounded-circle bg-success bg-opacity-10 align-items-center justify-content-center"
+                     style="width:90px;height:90px;display:@(string.IsNullOrWhiteSpace(imageUrl) ? "flex" : "none");">
+                    <i class="bi bi-person-circle text-success"
+                       style="font-size:60px;"></i>
+                </div>
+            </div>
+
+            <div>
+                <h4 class="fw-bold mb-1">
+                    @Model.Profile.FullName
+                </h4>
+
+                <p class="text-muted mb-2">
+                    @Model.Profile.Email
+                </p>
+
+                <span class="badge bg-success">
+                    <i class="bi bi-shield-check me-1"></i>
+                    @Model.Profile.Role
+                </span>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- EDIT PROFILE -->
+        <div class="col-lg-7">
+            <div class="dashboard-panel p-4 h-100">
+
+                <h5 class="fw-bold mb-2">
+                    <i class="bi bi-pencil-square text-success me-2"></i>
+                    Profile Information
+                </h5>
+
+                <p class="text-muted mb-4">
+                    Update your personal details and profile image.
+                </p>
+
+                <form asp-controller="AdminProfile"
+                      asp-action="UpdateProfile"
+                      method="post"
+                      enctype="multipart/form-data">
+
+                    @Html.AntiForgeryToken()
+
+                    <div asp-validation-summary="ModelOnly"
+                         class="text-danger mb-3"></div>
+
+                    <input type="hidden"
+                           asp-for="Profile.UserId" />
+
+                    <!-- ADMIN ID -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            Administrator ID
+                        </label>
+
+                        <input type="text"
+                               class="form-control"
+                               value="@Model.Profile.UserId"
+                               readonly />
+                    </div>
+
+                    <!-- PROFILE IMAGE -->
+                    <div class="mb-4">
+                        <label asp-for="Profile.ImageFile"
+                               class="form-label fw-semibold">
+                            Profile Image
+                        </label>
+
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <img id="profileImagePreview"
+                                 src="@imageUrl"
+                                 alt="Profile preview"
+                                 class="rounded-circle border border-success"
+                                 style="width:100px;height:100px;object-fit:cover;display:@(string.IsNullOrWhiteSpace(imageUrl) ? "none" : "block");"
+                                 onerror="this.style.display='none';document.getElementById('editDefaultAvatar').style.display='flex';" />
+
+                            <div id="editDefaultAvatar"
+                                 class="rounded-circle bg-success bg-opacity-10 align-items-center justify-content-center"
+                                 style="width:100px;height:100px;display:@(string.IsNullOrWhiteSpace(imageUrl) ? "flex" : "none");">
+                                <i class="bi bi-person-circle text-success"
+                                   style="font-size:65px;"></i>
+                            </div>
+                        </div>
+
+                        <input asp-for="Profile.ImageFile"
+                               type="file"
+                               id="profileImageInput"
+                               class="form-control"
+                               accept=".jpg,.jpeg,.png,.webp"
+                               onchange="previewProfileImage(event)" />
+
+                        <span asp-validation-for="Profile.ImageFile"
+                              class="text-danger small"></span>
+
+                        <small class="text-muted">
+                            JPG, PNG or WEBP. Maximum size: 5 MB.
+                        </small>
+                    </div>
+
+                    <!-- FULL NAME -->
+                    <div class="mb-3">
+                        <label asp-for="Profile.FullName"
+                               class="form-label fw-semibold">
+                            Full Name
+                        </label>
+
+                        <input asp-for="Profile.FullName"
+                               class="form-control"
+                               placeholder="Enter full name" />
+
+                        <span asp-validation-for="Profile.FullName"
+                              class="text-danger small"></span>
+                    </div>
+
+                    <!-- EMAIL -->
+                    <div class="mb-3">
+                        <label asp-for="Profile.Email"
+                               class="form-label fw-semibold">
+                            Email Address
+                        </label>
+
+                        <input asp-for="Profile.Email"
+                               class="form-control"
+                               placeholder="Enter email address" />
+
+                        <span asp-validation-for="Profile.Email"
+                              class="text-danger small"></span>
+                    </div>
+
+                    <!-- ROLE -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">
+                            Account Role
+                        </label>
+
+                        <input type="text"
+                               class="form-control"
+                               value="@Model.Profile.Role"
+                               readonly />
+                    </div>
+
+                    <button type="submit"
+                            class="btn btn-success px-4">
+                        <i class="bi bi-check-circle me-1"></i>
+                        Save Changes
+                    </button>
+
+                </form>
+            </div>
+        </div>
+
+        <!-- CHANGE PASSWORD -->
+        <div class="col-lg-5">
+            <div class="dashboard-panel p-4 h-100">
+
+                <h5 class="fw-bold mb-2">
+                    <i class="bi bi-shield-lock text-success me-2"></i>
+                    Change Password
+                </h5>
+
+                <p class="text-muted mb-4">
+                    Keep your administrator account secure.
+                </p>
+
+                <form asp-controller="AdminProfile"
+                      asp-action="ChangePassword"
+                      method="post">
+
+                    @Html.AntiForgeryToken()
+
+                    <!-- CURRENT PASSWORD -->
+                    <div class="mb-3">
+                        <label asp-for="Password.CurrentPassword"
+                               class="form-label fw-semibold">
+                            Current Password
+                        </label>
+
+                        <div class="input-group">
+                            <input asp-for="Password.CurrentPassword"
+                                   id="currentPassword"
+                                   class="form-control"
+                                   placeholder="Current password"
+                                   autocomplete="current-password" />
+
+                            <button type="button"
+                                    class="btn btn-outline-secondary"
+                                    onclick="togglePassword('currentPassword', this)">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+
+                        <span asp-validation-for="Password.CurrentPassword"
+                              class="text-danger small"></span>
+                    </div>
+
+                    <!-- NEW PASSWORD -->
+                    <div class="mb-3">
+                        <label asp-for="Password.NewPassword"
+                               class="form-label fw-semibold">
+                            New Password
+                        </label>
+
+                        <div class="input-group">
+                            <input asp-for="Password.NewPassword"
+                                   id="newPassword"
+                                   class="form-control"
+                                   placeholder="New password"
+                                   autocomplete="new-password" />
+
+                            <button type="button"
+                                    class="btn btn-outline-secondary"
+                                    onclick="togglePassword('newPassword', this)">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+
+                        <span asp-validation-for="Password.NewPassword"
+                              class="text-danger small"></span>
+                    </div>
+
+                    <!-- CONFIRM PASSWORD -->
+                    <div class="mb-4">
+                        <label asp-for="Password.ConfirmPassword"
+                               class="form-label fw-semibold">
+                            Confirm New Password
+                        </label>
+
+                        <div class="input-group">
+                            <input asp-for="Password.ConfirmPassword"
+                                   id="confirmPassword"
+                                   class="form-control"
+                                   placeholder="Confirm new password"
+                                   autocomplete="new-password" />
+
+                            <button type="button"
+                                    class="btn btn-outline-secondary"
+                                    onclick="togglePassword('confirmPassword', this)">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+
+                        <span asp-validation-for="Password.ConfirmPassword"
+                              class="text-danger small"></span>
+                    </div>
+
+                    <button type="submit"
+                            class="btn btn-success px-4">
+                        <i class="bi bi-key me-1"></i>
+                        Update Password
+                    </button>
+
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function togglePassword(inputId, button) {
+            const input = document.getElementById(inputId);
+            const icon = button.querySelector("i");
+
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.replace("bi-eye", "bi-eye-slash");
+            } else {
+                input.type = "password";
+                icon.classList.replace("bi-eye-slash", "bi-eye");
+            }
+        }
+
+        function previewProfileImage(event) {
+            const file = event.target.files[0];
+            const preview = document.getElementById("profileImagePreview");
+            const defaultAvatar = document.getElementById("editDefaultAvatar");
+
+            if (!file) return;
+
+            const allowedTypes = [
+                "image/jpeg",
+                "image/png",
+                "image/webp"
+            ];
+
+            if (!allowedTypes.includes(file.type)) {
+                alert("Only JPG, PNG and WEBP images are allowed.");
+                event.target.value = "";
+                return;
+            }
+
+            if (file.size > 5 * 1024 * 1024) {
+                alert("Image must be smaller than 5 MB.");
+                event.target.value = "";
+                return;
+            }
+
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                preview.src = e.target.result;
+                preview.style.display = "block";
+                defaultAvatar.style.display = "none";
+            };
+
+            reader.readAsDataURL(file);
+        }
+    </script>
+
+    <partial name="_ValidationScriptsPartial" />
+}

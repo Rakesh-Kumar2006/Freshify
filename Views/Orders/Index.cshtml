@@ -1,0 +1,145 @@
+﻿@model List<Freshify.Models.Order>
+
+@{
+    ViewData["Title"] = "My Orders";
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+}
+
+@section Styles {
+    <style>
+        .orders-header {
+            background: #e8f2e9;
+            border: 1px solid #dce9dd;
+            border-radius: 16px;
+            padding: 26px;
+        }
+
+        .orders-panel {
+            background: white;
+            border: 1px solid #e0e7df;
+            border-radius: 14px;
+            padding: 24px;
+        }
+
+        .orders-table {
+            min-width: 650px;
+        }
+
+            .orders-table th {
+                font-size: 13px;
+                white-space: nowrap;
+            }
+
+            .orders-table td {
+                font-size: 14px;
+                padding-top: 18px;
+                padding-bottom: 18px;
+            }
+
+        .order-amount {
+            color: #206543;
+            font-weight: 750;
+        }
+    </style>
+}
+
+<div class="container py-4">
+
+    <div class="orders-header mb-4">
+        <h1 class="h3 fw-bold mb-2">My Orders</h1>
+        <p class="text-muted mb-0">
+            View your order history and delivery details.
+        </p>
+    </div>
+
+    @if (Model.Count == 0)
+    {
+        <div class="orders-panel text-center py-5">
+            <div class="display-5 mb-3" aria-hidden="true">📦</div>
+
+            <h2 class="h4 fw-bold">No orders yet</h2>
+
+            <p class="text-muted">
+                Your orders will appear here after checkout.
+            </p>
+
+            <a asp-controller="Products"
+               asp-action="Index"
+               class="btn btn-success px-4">
+                Start Shopping
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="orders-panel">
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h5 fw-bold mb-0">Order History</h2>
+                <span class="small text-muted">
+                    @Model.Count order(s)
+                </span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle orders-table">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">Order ID</th>
+                            <th scope="col">Date</th>
+                            <th scope="col">Delivery City</th>
+                            <th scope="col">Total</th>
+                            <th scope="col">Status</th>
+                            <th scope="col" class="text-end">Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var order in Model)
+                        {
+                            var badgeClass = order.OrderStatus switch
+                            {
+                                "Delivered" => "bg-success",
+                                "Completed" => "bg-success",
+                                "Cancelled" => "bg-danger",
+                                "Shipped" => "bg-primary",
+                                _ => "bg-warning text-dark"
+                            };
+
+                            <tr>
+                                <td class="fw-semibold">#@order.OrderId</td>
+
+                                <td>
+                                    @order.OrderDate.ToString("dd MMM yyyy")
+                                </td>
+
+                                <td>@order.DeliveryCity</td>
+
+                                <td class="order-amount">
+                                    ₹@order.TotalAmount.ToString("N2")
+                                </td>
+
+                                <td>
+                                    <span class="badge @badgeClass">
+                                        @order.OrderStatus
+                                    </span>
+                                </td>
+
+                                <td class="text-end">
+                                    <a asp-controller="Orders"
+                                       asp-action="Details"
+                                       asp-route-id="@order.OrderId"
+                                       class="btn btn-outline-success btn-sm"
+                                       aria-label="View details for order @order.OrderId">
+                                        View Details
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    }
+</div>

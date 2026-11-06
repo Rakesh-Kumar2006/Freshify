@@ -1,0 +1,350 @@
+﻿@using System.Linq
+@model Freshify.ViewModels.AdminReviewsViewModel
+
+@{
+    ViewData["Title"] = "Review Management";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+
+    <!-- PAGE HEADER -->
+    <div class="d-flex justify-content-between align-items-center
+        flex-wrap gap-2 mb-4">
+        <div>
+            <h3 class="fw-bold mb-1">
+                <i class="bi bi-star-fill text-success me-2"></i>
+                Review Management
+            </h3>
+
+            <p class="text-muted mb-0">
+                View and manage customer reviews and feedback.
+            </p>
+        </div>
+
+        <span class="badge bg-success fs-6">
+            Total Reviews: @Model.TotalReviews
+        </span>
+    </div>
+
+    <!-- SUMMARY -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="dashboard-panel p-4 h-100">
+                <h6 class="text-muted">
+                    <i class="bi bi-chat-square-text me-2"></i>
+                    Total Reviews
+                </h6>
+
+                <h3 class="fw-bold mb-0">
+                    @Model.TotalReviews
+                </h3>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="dashboard-panel p-4 h-100">
+                <h6 class="text-muted">
+                    <i class="bi bi-star-half me-2"></i>
+                    Average Rating
+                </h6>
+
+                <h3 class="fw-bold text-warning mb-0">
+                    @Model.AverageRating.ToString("0.0")
+                    <i class="bi bi-star-fill fs-5"></i>
+                </h3>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="dashboard-panel p-4 h-100">
+                <h6 class="text-muted">
+                    <i class="bi bi-stars me-2"></i>
+                    5-Star Reviews
+                </h6>
+
+                <h3 class="fw-bold text-success mb-0">
+                    @Model.FiveStarReviews
+                </h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- ALERTS -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show"
+             role="alert">
+            @TempData["Success"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show"
+             role="alert">
+            @TempData["Error"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- REVIEWS -->
+    <div class="dashboard-panel">
+        <div class="d-flex justify-content-between align-items-center
+            flex-wrap gap-2 mb-3">
+            <h5 class="fw-bold mb-0">
+                <i class="bi bi-chat-square-text text-success me-2"></i>
+                All Reviews & Feedback
+            </h5>
+
+            <input type="search"
+                   id="reviewSearch"
+                   class="form-control"
+                   style="max-width:260px;"
+                   placeholder="Search reviews..."
+                   aria-label="Search reviews" />
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle"
+                   id="reviewTable">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Customer</th>
+                        <th scope="col">Review For</th>
+                        <th scope="col">Order ID</th>
+                        <th scope="col">Rating</th>
+                        <th scope="col">Review Title</th>
+                        <th scope="col">Comment</th>
+                        <th scope="col">Feedback Type</th>
+                        <th scope="col">Date</th>
+                        <th scope="col" class="text-center">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var review in Model.Reviews)
+                    {
+                        <tr>
+                            <td>@review.ReviewId</td>
+
+                            <td class="fw-semibold">
+                                @review.CustomerName
+                            </td>
+
+                            <!-- CORRECT REVIEW LABEL -->
+                            <td style="min-width:160px;">
+                                @if (review.FeedbackType == "Product")
+                                {
+                                    <span class="fw-semibold">
+                                        @(string.IsNullOrWhiteSpace(review.ProductName) ||
+                                          review.ProductName == "General Feedback"
+                                            ? "Product review — name unavailable"
+                                            : review.ProductName)
+                                    </span>
+                                }
+                                else if (review.OrderId.HasValue)
+                                {
+                                    <span class="fw-semibold">
+                                        Order Feedback
+                                    </span>
+
+                                    <div class="small text-muted">
+                                        For the selected order
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">
+                                        General Feedback
+                                    </span>
+                                }
+                            </td>
+
+                            <td class="text-nowrap">
+                                @(review.OrderId.HasValue
+                                    ? $"#{review.OrderId.Value}"
+                                    : "Not linked")
+                            </td>
+
+                            <td style="min-width:150px;">
+                                @if (review.Rating.HasValue &&
+                                     review.Rating.Value >= 1 &&
+                                     review.Rating.Value <= 5)
+                                {
+                                    <div class="d-flex flex-column gap-1">
+                                        <span class="text-warning"
+                                              role="img"
+                                              aria-label="@review.Rating.Value out of 5 stars">
+                                            @for (var i = 1; i <= 5; i++)
+                                            {
+                                                if (i <= review.Rating.Value)
+                                                {
+                                                    <i class="bi bi-star-fill"
+                                                       aria-hidden="true"></i>
+                                                }
+                                                else
+                                                {
+                                                    <i class="bi bi-star"
+                                                       aria-hidden="true"></i>
+                                                }
+                                            }
+                                        </span>
+
+                                        <small class="text-muted">
+                                            @review.Rating.Value / 5
+                                        </small>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">N/A</span>
+                                }
+                            </td>
+
+                            <td class="fw-semibold"
+                                style="min-width:150px;">
+                                @(string.IsNullOrWhiteSpace(review.ReviewTitle)
+                                    ? "-"
+                                    : review.ReviewTitle)
+                            </td>
+
+                            <td style="min-width:200px; max-width:300px;">
+                                @if (!string.IsNullOrWhiteSpace(review.Comment))
+                                {
+                                    <span class="d-inline-block text-truncate"
+                                          style="max-width:260px;"
+                                          title="@review.Comment">
+                                        @review.Comment
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">
+                                        No comment
+                                    </span>
+                                }
+                            </td>
+
+                            <td>
+                                <span class="badge bg-light text-dark border">
+                                    @(string.IsNullOrWhiteSpace(review.FeedbackType)
+                                        ? "-"
+                                        : review.FeedbackType)
+                                </span>
+                            </td>
+
+                            <td class="text-nowrap">
+                                @review.CreatedAt.ToString("dd MMM yyyy")
+                            </td>
+
+                            <td class="text-center">
+                                <div class="d-flex justify-content-center
+                                    align-items-center gap-2">
+
+                                    <a asp-controller="AdminReviews"
+                                       asp-action="Details"
+                                       asp-route-id="@review.ReviewId"
+                                       class="btn btn-sm btn-outline-primary"
+                                       title="View Review"
+                                       aria-label="View Review">
+                                        <i class="bi bi-eye-fill"
+                                           aria-hidden="true"></i>
+                                    </a>
+
+                                    <form asp-controller="AdminReviews"
+                                          asp-action="Delete"
+                                          asp-route-id="@review.ReviewId"
+                                          method="post"
+                                          class="d-inline"
+                                          onsubmit="return confirm('Are you sure you want to delete this review?');">
+
+                                        @Html.AntiForgeryToken()
+
+                                        <button type="submit"
+                                                class="btn btn-sm btn-outline-danger"
+                                                title="Delete Review"
+                                                aria-label="Delete Review">
+                                            <i class="bi bi-trash-fill"
+                                               aria-hidden="true"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (!Model.Reviews.Any())
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-chat-square-text text-muted display-5"></i>
+
+                <h6 class="fw-semibold mt-3">
+                    No Reviews Found
+                </h6>
+
+                <p class="text-muted mb-0">
+                    Customer reviews and feedback will appear here.
+                </p>
+            </div>
+        }
+
+        <div id="noSearchResults"
+             class="text-center text-muted py-4 d-none">
+            <i class="bi bi-search me-1"></i>
+            No matching reviews found.
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const searchInput =
+                document.getElementById("reviewSearch");
+
+            const rows =
+                document.querySelectorAll("#reviewTable tbody tr");
+
+            const noSearchResults =
+                document.getElementById("noSearchResults");
+
+            searchInput.addEventListener("input", function () {
+                const search = this.value.trim().toLowerCase();
+                let visibleRows = 0;
+
+                rows.forEach(function (row) {
+                    const matches = row.textContent
+                        .toLowerCase()
+                        .includes(search);
+
+                    row.style.display = matches ? "" : "none";
+
+                    if (matches) {
+                        visibleRows++;
+                    }
+                });
+
+                noSearchResults.classList.toggle(
+                    "d-none",
+                    rows.length === 0 ||
+                    visibleRows > 0 ||
+                    search.length === 0
+                );
+            });
+        });
+    </script>
+}

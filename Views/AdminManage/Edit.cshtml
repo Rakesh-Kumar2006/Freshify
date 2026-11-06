@@ -1,0 +1,302 @@
+﻿@model Freshify.ViewModels.EditAdminViewModel
+
+@{
+    ViewData["Title"] = "Edit Administrator";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+
+    <!-- PAGE HEADER -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+
+        <div>
+            <h3 class="fw-bold mb-1">
+                <i class="bi bi-pencil-square text-success me-2"></i>
+                Edit Administrator
+            </h3>
+
+            <p class="text-muted mb-0">
+                Update administrator account information and profile image.
+            </p>
+        </div>
+
+        <a asp-controller="AdminManage"
+           asp-action="Index"
+           class="btn btn-outline-secondary">
+
+            <i class="bi bi-arrow-left me-1"></i>
+            Back to Admins
+        </a>
+
+    </div>
+
+    <!-- EDIT FORM -->
+    <div class="dashboard-panel p-4">
+
+        <h5 class="fw-bold mb-4">
+            <i class="bi bi-person-gear text-success me-2"></i>
+            Administrator Information
+        </h5>
+
+        <form asp-controller="AdminManage"
+              asp-action="Edit"
+              asp-route-id="@Model.UserId"
+              method="post"
+              enctype="multipart/form-data">
+
+            @Html.AntiForgeryToken()
+
+            <input type="hidden" asp-for="UserId" />
+
+            <div asp-validation-summary="ModelOnly"
+                 class="text-danger mb-3"></div>
+
+            <!-- PROFILE IMAGE SECTION -->
+            <div class="mb-4">
+
+                <label class="form-label fw-semibold">
+                    <i class="bi bi-camera text-success me-1"></i>
+                    Administrator Profile Image
+                </label>
+
+                <div class="d-flex align-items-center gap-4 flex-wrap mb-3">
+
+                    <!-- CURRENT IMAGE -->
+                    <div class="text-center">
+
+                        @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
+                        {
+                            <img id="adminImagePreview"
+                                 src="@Model.ImageUrl"
+                                 alt="Administrator Profile"
+                                 class="rounded-circle"
+                                 style="width:110px;
+                            height:110px;
+                            object-fit:cover;
+                            border:3px solid #22c55e;" />
+                        }
+                        else
+                        {
+                            <img id="adminImagePreview"
+                                 alt="Administrator Profile Preview"
+                                 class="rounded-circle d-none"
+                                 style="width:110px;
+                            height:110px;
+                            object-fit:cover;
+                            border:3px solid #22c55e;" />
+                        }
+
+                        <div id="defaultAdminAvatar"
+                             class="rounded-circle bg-success bg-opacity-10
+                            align-items-center justify-content-center
+                            @(string.IsNullOrWhiteSpace(Model.ImageUrl) ? "d-flex" : "d-none")"
+                             style="width:110px;height:110px;">
+
+                            <i class="bi bi-person-circle text-success"
+                               style="font-size:65px;"></i>
+                        </div>
+
+                        <small class="text-muted d-block mt-2">
+                            Profile Picture
+                        </small>
+
+                    </div>
+
+                    <!-- FILE UPLOAD -->
+                    <div class="flex-grow-1">
+
+                        <label asp-for="ImageFile"
+                               class="form-label fw-semibold">
+                            Choose New Image
+                        </label>
+
+                        <input asp-for="ImageFile"
+                               id="adminImageInput"
+                               type="file"
+                               class="form-control"
+                               accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                               onchange="previewAdminImage(this)" />
+
+                        <span asp-validation-for="ImageFile"
+                              class="text-danger small"></span>
+
+                        <small class="text-muted d-block mt-2">
+                            Supported formats: JPG, JPEG, PNG, WEBP.
+                            Maximum size: 5 MB.
+                        </small>
+
+                        <small class="text-success d-block mt-1">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Leave empty to keep the existing image.
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <hr class="my-4" />
+
+            <!-- ADMIN INFORMATION -->
+            <div class="row g-3">
+
+                <!-- ADMIN ID -->
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">
+                        Admin ID
+                    </label>
+
+                    <input type="text"
+                           class="form-control bg-light"
+                           value="@Model.UserId"
+                           readonly />
+                </div>
+
+                <!-- ROLE -->
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">
+                        Role
+                    </label>
+
+                    <input type="text"
+                           class="form-control bg-light"
+                           value="Admin"
+                           readonly />
+                </div>
+
+                <!-- FULL NAME -->
+                <div class="col-md-6">
+                    <label asp-for="FullName"
+                           class="form-label fw-semibold">
+                        Full Name
+                    </label>
+
+                    <input asp-for="FullName"
+                           class="form-control"
+                           placeholder="Enter administrator name"
+                           autocomplete="name" />
+
+                    <span asp-validation-for="FullName"
+                          class="text-danger small"></span>
+                </div>
+
+                <!-- EMAIL -->
+                <div class="col-md-6">
+                    <label asp-for="Email"
+                           class="form-label fw-semibold">
+                        Email Address
+                    </label>
+
+                    <input asp-for="Email"
+                           class="form-control"
+                           placeholder="Enter administrator email"
+                           autocomplete="email" />
+
+                    <span asp-validation-for="Email"
+                          class="text-danger small"></span>
+                </div>
+
+            </div>
+
+            <!-- ACTION BUTTONS -->
+            <div class="d-flex justify-content-end gap-2 mt-4">
+
+                <a asp-controller="AdminManage"
+                   asp-action="Index"
+                   class="btn btn-outline-secondary px-4">
+
+                    <i class="bi bi-x-circle me-1"></i>
+                    Cancel
+                </a>
+
+                <button type="submit"
+                        class="btn btn-success px-4">
+
+                    <i class="bi bi-check-circle me-1"></i>
+                    Save Changes
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+@section Scripts {
+
+    <script>
+        function previewAdminImage(input) {
+
+            const preview =
+                document.getElementById("adminImagePreview");
+
+            const defaultAvatar =
+                document.getElementById("defaultAdminAvatar");
+
+            const validation =
+                document.querySelector(
+                    '[data-valmsg-for="ImageFile"]'
+                );
+
+            if (!input.files || input.files.length === 0) {
+                return;
+            }
+
+            const file = input.files[0];
+
+            const allowedTypes = [
+                "image/jpeg",
+                "image/png",
+                "image/webp"
+            ];
+
+            const maxSize = 5 * 1024 * 1024;
+
+            if (!allowedTypes.includes(file.type)) {
+
+                if (validation) {
+                    validation.textContent =
+                        "Only JPG, PNG and WEBP images are allowed.";
+                }
+
+                input.value = "";
+                return;
+            }
+
+            if (file.size > maxSize) {
+
+                if (validation) {
+                    validation.textContent =
+                        "Image size must not exceed 5 MB.";
+                }
+
+                input.value = "";
+                return;
+            }
+
+            if (validation) {
+                validation.textContent = "";
+            }
+
+            const reader = new FileReader();
+
+            reader.onload = function (event) {
+
+                preview.src = event.target.result;
+
+                preview.classList.remove("d-none");
+
+                defaultAvatar.classList.remove("d-flex");
+                defaultAvatar.classList.add("d-none");
+            };
+
+            reader.readAsDataURL(file);
+        }
+    </script>
+
+    <partial name="_ValidationScriptsPartial" />
+}

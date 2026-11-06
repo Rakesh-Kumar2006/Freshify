@@ -1,0 +1,266 @@
+﻿@model Freshify.ViewModels.ReviewPageViewModel
+
+@{
+    ViewData["Title"] = "Reviews & Feedback";
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+}
+
+@section Styles {
+    <style>
+        .review-header {
+            background: #e8f2e9;
+            border: 1px solid #dce9dd;
+            border-radius: 16px;
+            padding: 26px;
+        }
+
+        .review-panel {
+            background: white;
+            border: 1px solid #e0e7df;
+            border-radius: 14px;
+            padding: 24px;
+        }
+
+            .review-panel .form-label {
+                font-size: 13px;
+                font-weight: 650;
+            }
+
+        .review-entry {
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #e8eee5;
+        }
+
+            .review-entry:last-child {
+                padding-bottom: 0;
+                margin-bottom: 0;
+                border-bottom: 0;
+            }
+
+        .review-stars {
+            color: #946200;
+            font-size: 20px;
+            letter-spacing: 2px;
+        }
+
+        .review-comment {
+            white-space: pre-line;
+            overflow-wrap: anywhere;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+    </style>
+}
+
+<div class="container py-4">
+
+    <div class="review-header mb-4">
+        <h1 class="h3 fw-bold mb-2">Reviews & Feedback</h1>
+        <p class="text-muted mb-0">
+            Share your experience with Freshify.
+        </p>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success" role="alert">
+            @TempData["Success"]
+        </div>
+    }
+
+    <div class="row g-4">
+
+        <!-- REVIEW FORM -->
+        <div class="col-lg-5">
+            <div class="review-panel">
+                <h2 class="h5 fw-bold mb-3">Write a Review</h2>
+
+                @if (Model.ProductId.HasValue)
+                {
+                    <div class="alert alert-light border small">
+                        Product: <strong>@Model.ProductName</strong>
+                    </div>
+                }
+
+                <form asp-controller="Reviews"
+                      asp-action="Create"
+                      method="post">
+
+                    @Html.AntiForgeryToken()
+
+                    <input asp-for="ProductId" type="hidden" />
+
+                    <div asp-validation-summary="All"
+                         class="text-danger small mb-3"
+                         role="alert"></div>
+
+                    <!-- ORDER DROPDOWN -->
+                    <div class="mb-3">
+                        <label asp-for="OrderId"
+                               class="form-label">
+                            Select Order (Optional)
+                        </label>
+
+                        <select asp-for="OrderId"
+                                asp-items="Model.OrderOptions"
+                                class="form-select">
+
+                            <option value="">
+                                @(Model.ProductId.HasValue
+                                    ? "Product review without an order"
+                                    : "General feedback — no order")
+                            </option>
+                        </select>
+
+                        <span asp-validation-for="OrderId"
+                              class="text-danger small"></span>
+
+                        <div class="form-text">
+                            @if (Model.OrderOptions.Count == 0)
+                            {
+                                <span>No matching orders available.</span>
+                            }
+                            else
+                            {
+                                <span>
+                                    Select one of your orders to review it.
+                                </span>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- RATING -->
+                    <div class="mb-3">
+                        <label asp-for="Rating"
+                               class="form-label"></label>
+
+                        <select asp-for="Rating"
+                                class="form-select"
+                                required>
+                            <option value="">Select a rating</option>
+                            <option value="5">★★★★★ — Excellent</option>
+                            <option value="4">★★★★☆ — Good</option>
+                            <option value="3">★★★☆☆ — Average</option>
+                            <option value="2">★★☆☆☆ — Poor</option>
+                            <option value="1">★☆☆☆☆ — Very Poor</option>
+                        </select>
+                    </div>
+
+                    <!-- TITLE -->
+                    <div class="mb-3">
+                        <label asp-for="ReviewTitle"
+                               class="form-label">
+                            Review Title (Optional)
+                        </label>
+
+                        <input asp-for="ReviewTitle"
+                               class="form-control"
+                               maxlength="100"
+                               placeholder="A short summary" />
+                    </div>
+
+                    <!-- COMMENT -->
+                    <div class="mb-4">
+                        <label asp-for="Comment"
+                               class="form-label">
+                            Your Feedback
+                        </label>
+
+                        <textarea asp-for="Comment"
+                                  class="form-control"
+                                  rows="5"
+                                  maxlength="1000"
+                                  placeholder="Tell us about your experience..."
+                                  required></textarea>
+
+                        <div class="form-text">
+                            Maximum 1000 characters.
+                        </div>
+                    </div>
+
+                    <button type="submit"
+                            class="btn btn-success w-100">
+                        Submit Review
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- REVIEW HISTORY -->
+        <div class="col-lg-7">
+            <div class="review-panel">
+                <h2 class="h5 fw-bold mb-4">My Reviews</h2>
+
+                @if (Model.Reviews.Count == 0)
+                {
+                    <p class="text-muted mb-0">
+                        You have not submitted any reviews yet.
+                    </p>
+                }
+                else
+                {
+                    @foreach (var review in Model.Reviews)
+                    {
+                        <article class="review-entry">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                                <span class="badge bg-light text-success border">
+                                    @review.FeedbackType
+                                </span>
+
+                                <span class="small text-muted">
+                                    @review.CreatedAt.ToString("dd MMM yyyy")
+                                </span>
+                            </div>
+
+                            @if (review.Rating.HasValue &&
+                                 review.Rating.Value >= 1 &&
+                                 review.Rating.Value <= 5)
+                            {
+                                <div class="review-stars mb-2"
+                                     role="img"
+                                     aria-label="@review.Rating out of 5 stars">
+                                    <span aria-hidden="true">
+                                        @(new string('★', review.Rating.Value))@(new string('☆', 5 - review.Rating.Value))
+                                    </span>
+                                </div>
+                            }
+
+                            @if (!string.IsNullOrWhiteSpace(review.ReviewTitle))
+                            {
+                                <h3 class="h6 fw-bold">
+                                    @review.ReviewTitle
+                                </h3>
+                            }
+
+                            <p class="review-comment text-muted mb-2">@review.Comment</p>
+
+                            <div class="d-flex flex-wrap gap-3">
+                                @if (review.ProductId.HasValue)
+                                {
+                                    <a asp-controller="Products"
+                                       asp-action="Details"
+                                       asp-route-id="@review.ProductId"
+                                       class="small text-success">
+                                        View Product
+                                    </a>
+                                }
+
+                                @if (review.OrderId.HasValue)
+                                {
+                                    <a asp-controller="Orders"
+                                       asp-action="Details"
+                                       asp-route-id="@review.OrderId"
+                                       class="small text-success">
+                                        Order #@review.OrderId
+                                    </a>
+                                }
+                            </div>
+                        </article>
+                    }
+                }
+            </div>
+        </div>
+
+    </div>
+</div>

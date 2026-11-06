@@ -1,0 +1,293 @@
+﻿@model Freshify.ViewModels.CartViewModel
+
+@{
+    ViewData["Title"] = "Shopping Cart";
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+}
+
+@section Styles {
+    <style>
+        .cart-header {
+            background: #e8f2e9;
+            border: 1px solid #dce9dd;
+            border-radius: 16px;
+            padding: 26px;
+        }
+
+        .cart-panel {
+            background: white;
+            border: 1px solid #e0e7df;
+            border-radius: 14px;
+            padding: 22px;
+        }
+
+        .cart-image {
+            width: 85px;
+            height: 85px;
+            background: #f1f5ef;
+            border: 1px solid #e6ece2;
+            border-radius: 10px;
+            object-fit: contain;
+            padding: 8px;
+        }
+
+        .cart-placeholder {
+            display: grid;
+            place-items: center;
+            font-size: 30px;
+        }
+
+        .cart-product-link {
+            color: #283c30;
+            font-weight: 700;
+            text-decoration: none;
+            overflow-wrap: anywhere;
+        }
+
+            .cart-product-link:hover {
+                color: #206543;
+                text-decoration: underline;
+            }
+
+        .cart-quantity {
+            width: 80px;
+        }
+
+        .cart-total {
+            font-size: 25px;
+            font-weight: 800;
+            color: #206543;
+        }
+
+        .cart-empty-icon {
+            font-size: 55px;
+        }
+    </style>
+}
+
+<div class="container py-4">
+
+    <div class="cart-header mb-4">
+        <h1 class="h3 fw-bold mb-2">Shopping Cart</h1>
+        <p class="text-muted mb-0">
+            Review your products and update quantities.
+        </p>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success" role="alert">
+            @TempData["Success"]
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger" role="alert">
+            @TempData["Error"]
+        </div>
+    }
+
+    @if (Model.Items.Count == 0)
+    {
+        <div class="cart-panel text-center py-5">
+            <div class="cart-empty-icon mb-3" aria-hidden="true">
+                🛒
+            </div>
+
+            <h2 class="h4 fw-bold">Your cart is empty</h2>
+
+            <p class="text-muted">
+                Explore our products and add your favourites.
+            </p>
+
+            <a asp-controller="Products"
+               asp-action="Index"
+               class="btn btn-success px-4">
+                Browse Products
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+
+            <!-- CART ITEMS -->
+            <div class="col-lg-8">
+                <div class="cart-panel">
+                    <h2 class="h5 fw-bold mb-4">
+                        Your Items (@Model.Items.Count)
+                    </h2>
+
+                    @foreach (var item in Model.Items)
+                    {
+                        <div class="border-bottom pb-4 mb-4">
+                            <div class="d-flex gap-3">
+
+                                <a asp-controller="Products"
+                                   asp-action="Details"
+                                   asp-route-id="@item.ProductId"
+                                   aria-label="View @item.Name"
+                                   class="flex-shrink-0">
+
+                                    @if (!string.IsNullOrWhiteSpace(item.ImageUrl))
+                                    {
+                                        <img src="@Url.Content(item.ImageUrl)"
+                                             alt="@item.Name"
+                                             class="cart-image"
+                                             loading="lazy" />
+                                    }
+                                    else
+                                    {
+                                        <span class="cart-image cart-placeholder"
+                                              aria-hidden="true">
+                                            🛍️
+                                        </span>
+                                    }
+                                </a>
+
+                                <div class="flex-grow-1">
+                                    <a asp-controller="Products"
+                                       asp-action="Details"
+                                       asp-route-id="@item.ProductId"
+                                       class="cart-product-link">
+                                        @item.Name
+                                    </a>
+
+                                    <p class="small text-muted mb-1">
+                                        @item.Unit
+                                    </p>
+
+                                    <p class="text-success fw-bold mb-2">
+                                        ₹@item.Price.ToString("N2") each
+                                    </p>
+
+                                    @if (item.StockQuantity <= 0)
+                                    {
+                                        <p class="small text-danger">
+                                            Currently out of stock.
+                                            Please remove this item.
+                                        </p>
+                                    }
+                                    else
+                                    {
+                                        @if (item.Quantity > item.StockQuantity)
+                                        {
+                                            <p class="small text-danger">
+                                                Only @item.StockQuantity available.
+                                                Please reduce the quantity.
+                                            </p>
+                                        }
+
+                                        <form asp-controller="Cart"
+                                              asp-action="Update"
+                                              method="post"
+                                              class="d-flex align-items-end flex-wrap gap-2">
+
+                                            @Html.AntiForgeryToken()
+
+                                            <input type="hidden"
+                                                   name="productId"
+                                                   value="@item.ProductId" />
+
+                                            <div>
+                                                <label for="quantity-@item.ProductId"
+                                                       class="form-label small mb-1">
+                                                    Quantity
+                                                </label>
+
+                                                <input type="number"
+                                                       id="quantity-@item.ProductId"
+                                                       name="quantity"
+                                                       value="@item.Quantity"
+                                                       min="1"
+                                                       max="@item.StockQuantity"
+                                                       step="1"
+                                                       class="form-control form-control-sm cart-quantity"
+                                                       required />
+                                            </div>
+
+                                            <button type="submit"
+                                                    class="btn btn-outline-success btn-sm">
+                                                Update
+                                            </button>
+                                        </form>
+                                    }
+
+                                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-3">
+                                        <form asp-controller="Cart"
+                                              asp-action="Remove"
+                                              method="post">
+
+                                            @Html.AntiForgeryToken()
+
+                                            <input type="hidden"
+                                                   name="productId"
+                                                   value="@item.ProductId" />
+
+                                            <button type="submit"
+                                                    class="btn btn-outline-danger btn-sm">
+                                                Remove
+                                            </button>
+                                        </form>
+
+                                        <span class="fw-bold">
+                                            ₹@item.Subtotal.ToString("N2")
+                                        </span>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    }
+
+                    <a asp-controller="Products"
+                       asp-action="Index"
+                       class="text-success text-decoration-none small">
+                        ← Continue Shopping
+                    </a>
+                </div>
+            </div>
+
+            <!-- SUMMARY -->
+            <!-- SUMMARY -->
+            <div class="col-lg-4">
+                <div class="cart-panel">
+                    <h2 class="h5 fw-bold mb-4">Cart Summary</h2>
+
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Product lines</span>
+                        <strong>@Model.Items.Count</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center border-top pt-3">
+                        <span class="fw-semibold">Subtotal</span>
+
+                        <span class="cart-total">
+                            ₹@Model.Total.ToString("N2")
+                        </span>
+                    </div>
+
+                    <p class="small text-muted mt-3">
+                        Review your delivery details and order summary
+                        on the checkout page.
+                    </p>
+
+                    <a asp-controller="Checkout"
+                       asp-action="Index"
+                       class="btn btn-success w-100 py-2 mt-2">
+                        Proceed to Checkout →
+                    </a>
+
+                    <a asp-controller="Products"
+                       asp-action="Index"
+                       class="btn btn-outline-success w-100 mt-2">
+                        Continue Shopping
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    }
+
+</div>

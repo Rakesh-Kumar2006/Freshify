@@ -1,0 +1,526 @@
+﻿@model Freshify.ViewModels.AdminManageViewModel
+
+@{
+    ViewData["Title"] = "Manage Admins";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+
+    <!-- PAGE HEADER -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+        <div>
+            <h3 class="fw-bold mb-1">
+                <i class="bi bi-people-fill text-success me-2"></i>
+                Manage Admins
+            </h3>
+
+            <p class="text-muted mb-0">
+                View, register, edit and manage administrators.
+            </p>
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-success fs-6">
+                Total Admins: @Model.TotalAdmins
+            </span>
+
+            <a href="#registerAdminForm"
+               class="btn btn-success">
+                <i class="bi bi-person-plus-fill me-1"></i>
+                Add Admin
+            </a>
+        </div>
+    </div>
+
+    <!-- SUCCESS MESSAGE -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show"
+             role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            @TempData["Success"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- ERROR MESSAGE -->
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show"
+             role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            @TempData["Error"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- SUMMARY CARDS -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-6">
+            <div class="dashboard-panel p-4 h-100">
+                <h6 class="text-muted">
+                    <i class="bi bi-people me-2"></i>
+                    Total Administrators
+                </h6>
+
+                <h3 class="fw-bold text-success mb-0">
+                    @Model.TotalAdmins
+                </h3>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="dashboard-panel p-4 h-100">
+                <h6 class="text-muted">
+                    <i class="bi bi-shield-check me-2"></i>
+                    Administrator Role
+                </h6>
+
+                <h3 class="fw-bold text-success mb-0">
+                    Admin
+                </h3>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- REGISTER ADMIN FORM -->
+    <div class="dashboard-panel p-4 mb-4"
+         id="registerAdminForm">
+
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+            <div>
+                <h5 class="fw-bold mb-1">
+                    <i class="bi bi-person-plus-fill text-success me-2"></i>
+                    Register New Admin
+                </h5>
+
+                <p class="text-muted mb-0">
+                    Create a new administrator account with a profile picture.
+                </p>
+            </div>
+
+            <span class="badge bg-light text-success border">
+                Admin Registration
+            </span>
+        </div>
+
+        <!-- IMPORTANT: multipart/form-data is required for image uploads -->
+        <form asp-controller="AdminManage"
+              asp-action="Create"
+              method="post"
+              enctype="multipart/form-data">
+
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="ModelOnly"
+                 class="text-danger mb-3"></div>
+
+            <div class="row g-3">
+
+                <!-- FULL NAME -->
+                <div class="col-md-6">
+                    <label asp-for="NewAdmin.FullName"
+                           class="form-label fw-semibold">
+                        Full Name
+                    </label>
+
+                    <input asp-for="NewAdmin.FullName"
+                           class="form-control"
+                           placeholder="Enter admin full name"
+                           autocomplete="name" />
+
+                    <span asp-validation-for="NewAdmin.FullName"
+                          class="text-danger small"></span>
+                </div>
+
+                <!-- EMAIL -->
+                <div class="col-md-6">
+                    <label asp-for="NewAdmin.Email"
+                           class="form-label fw-semibold">
+                        Email Address
+                    </label>
+
+                    <input asp-for="NewAdmin.Email"
+                           class="form-control"
+                           placeholder="Enter admin email address"
+                           autocomplete="email" />
+
+                    <span asp-validation-for="NewAdmin.Email"
+                          class="text-danger small"></span>
+                </div>
+
+                <!-- PASSWORD -->
+                <div class="col-md-6">
+                    <label asp-for="NewAdmin.Password"
+                           class="form-label fw-semibold">
+                        Password
+                    </label>
+
+                    <div class="input-group">
+                        <input asp-for="NewAdmin.Password"
+                               id="adminPassword"
+                               class="form-control"
+                               placeholder="Enter password"
+                               autocomplete="new-password" />
+
+                        <button type="button"
+                                class="btn btn-outline-secondary"
+                                onclick="togglePassword('adminPassword', this)">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+
+                    <span asp-validation-for="NewAdmin.Password"
+                          class="text-danger small"></span>
+                </div>
+
+                <!-- CONFIRM PASSWORD -->
+                <div class="col-md-6">
+                    <label asp-for="NewAdmin.ConfirmPassword"
+                           class="form-label fw-semibold">
+                        Confirm Password
+                    </label>
+
+                    <div class="input-group">
+                        <input asp-for="NewAdmin.ConfirmPassword"
+                               id="adminConfirmPassword"
+                               class="form-control"
+                               placeholder="Confirm password"
+                               autocomplete="new-password" />
+
+                        <button type="button"
+                                class="btn btn-outline-secondary"
+                                onclick="togglePassword('adminConfirmPassword', this)">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+
+                    <span asp-validation-for="NewAdmin.ConfirmPassword"
+                          class="text-danger small"></span>
+                </div>
+
+                <!-- PROFILE IMAGE UPLOAD -->
+                <div class="col-md-6">
+                    <label asp-for="NewAdmin.ImageFile"
+                           class="form-label fw-semibold">
+                        Admin Profile Image
+                    </label>
+
+                    <input asp-for="NewAdmin.ImageFile"
+                           type="file"
+                           id="adminImageInput"
+                           class="form-control"
+                           accept=".jpg,.jpeg,.png,.webp"
+                           onchange="previewAdminImage(event)" />
+
+                    <span asp-validation-for="NewAdmin.ImageFile"
+                          class="text-danger small"></span>
+
+                    <small class="text-muted d-block mt-1">
+                        JPG, JPEG, PNG or WEBP. Maximum size: 5 MB.
+                    </small>
+                </div>
+
+                <!-- IMAGE PREVIEW -->
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">
+                        Profile Image Preview
+                    </label>
+
+                    <div class="d-flex align-items-center gap-3">
+
+                        <img id="adminImagePreview"
+                             alt="Selected administrator profile"
+                             class="rounded-circle border border-success"
+                             style="width:110px;
+                        height:110px;
+                        object-fit:cover;
+                        display:none;" />
+
+                        <div id="defaultImagePreview"
+                             class="rounded-circle bg-success bg-opacity-10
+                            d-flex align-items-center justify-content-center"
+                             style="width:110px;height:110px;">
+                            <i class="bi bi-person-circle text-success"
+                               style="font-size:65px;"></i>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- REGISTER BUTTON -->
+            <div class="d-flex justify-content-end mt-4">
+                <button type="submit"
+                        class="btn btn-success px-4">
+                    <i class="bi bi-person-plus-fill me-1"></i>
+                    Register Admin
+                </button>
+            </div>
+
+        </form>
+    </div>
+
+    <!-- ADMINISTRATORS TABLE -->
+    <div class="dashboard-panel p-4">
+
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+            <h5 class="fw-bold mb-0">
+                <i class="bi bi-list-ul text-success me-2"></i>
+                All Administrators
+            </h5>
+
+            <input type="search"
+                   id="adminSearch"
+                   class="form-control"
+                   style="max-width:260px;"
+                   placeholder="Search admins..." />
+        </div>
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle"
+                   id="adminTable">
+
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Profile</th>
+                        <th>Admin Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var admin in Model.Admins)
+                    {
+                        <tr>
+                            <td>@admin.UserId</td>
+
+                            <!-- ADMIN PROFILE IMAGE -->
+                            <td>
+                                @if (!string.IsNullOrWhiteSpace(admin.ImageUrl))
+                                {
+                                    <img src="@Url.Content(admin.ImageUrl)"
+                                         alt="Admin Profile"
+                                         class="rounded-circle"
+                                         style="width:45px;
+                                    height:45px;
+                                    object-fit:cover;" />
+                                }
+                                else
+                                {
+                                    <div class="rounded-circle bg-success bg-opacity-10
+                                        d-flex align-items-center justify-content-center"
+                                         style="width:45px;height:45px;">
+                                        <i class="bi bi-person-circle text-success fs-4"></i>
+                                    </div>
+                                }
+                            </td>
+
+                            <td class="fw-semibold">
+                                @admin.FullName
+                            </td>
+
+                            <td>@admin.Email</td>
+
+                            <td>
+                                <span class="badge bg-success">
+                                    <i class="bi bi-person-check me-1"></i>
+                                    Admin
+                                </span>
+                            </td>
+
+                            <td class="text-center">
+                                <div class="d-flex justify-content-center align-items-center gap-2">
+
+                                    <!-- VIEW -->
+                                    <a asp-controller="AdminManage"
+                                       asp-action="Details"
+                                       asp-route-id="@admin.UserId"
+                                       class="btn btn-sm btn-outline-primary"
+                                       title="View Admin">
+                                        <i class="bi bi-eye-fill"></i>
+                                    </a>
+
+                                    <!-- EDIT -->
+                                    <a asp-controller="AdminManage"
+                                       asp-action="Edit"
+                                       asp-route-id="@admin.UserId"
+                                       class="btn btn-sm btn-outline-success"
+                                       title="Edit Admin">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+
+                                    <!-- DELETE -->
+                                    <form asp-controller="AdminManage"
+                                          asp-action="Delete"
+                                          asp-route-id="@admin.UserId"
+                                          method="post"
+                                          class="d-inline"
+                                          onsubmit="return confirm('Are you sure you want to delete this administrator?');">
+
+                                        @Html.AntiForgeryToken()
+
+                                        <button type="submit"
+                                                class="btn btn-sm btn-outline-danger"
+                                                title="Delete Admin">
+                                            <i class="bi bi-trash-fill"></i>
+                                        </button>
+                                    </form>
+
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <!-- EMPTY STATE -->
+        @if (!Model.Admins.Any())
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-people text-muted display-5"></i>
+
+                <h6 class="fw-semibold mt-3">
+                    No Administrators Found
+                </h6>
+
+                <p class="text-muted mb-0">
+                    Administrator accounts will appear here.
+                </p>
+            </div>
+        }
+
+        <div id="noAdminResults"
+             class="text-center text-muted py-4 d-none">
+            No matching administrators found.
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const searchInput =
+                document.getElementById("adminSearch");
+
+            const rows =
+                document.querySelectorAll("#adminTable tbody tr");
+
+            const noResults =
+                document.getElementById("noAdminResults");
+
+            if (searchInput) {
+                searchInput.addEventListener("input", function () {
+                    const search = this.value.trim().toLowerCase();
+                    let visible = 0;
+
+                    rows.forEach(function (row) {
+                        const match =
+                            row.innerText.toLowerCase().includes(search);
+
+                        row.style.display = match ? "" : "none";
+
+                        if (match) visible++;
+                    });
+
+                    noResults.classList.toggle(
+                        "d-none",
+                        rows.length === 0 ||
+                        visible > 0 ||
+                        search.length === 0
+                    );
+                });
+            }
+        });
+
+        // SHOW / HIDE PASSWORD
+        function togglePassword(inputId, button) {
+            const input = document.getElementById(inputId);
+            const icon = button.querySelector("i");
+
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.replace("bi-eye", "bi-eye-slash");
+            } else {
+                input.type = "password";
+                icon.classList.replace("bi-eye-slash", "bi-eye");
+            }
+        }
+
+        // PREVIEW ADMIN PROFILE IMAGE
+        function previewAdminImage(event) {
+            const file = event.target.files[0];
+
+            const preview =
+                document.getElementById("adminImagePreview");
+
+            const defaultPreview =
+                document.getElementById("defaultImagePreview");
+
+            if (!file) {
+                preview.removeAttribute("src");
+                preview.style.display = "none";
+                defaultPreview.style.display = "flex";
+                return;
+            }
+
+            if (file.size > 5 * 1024 * 1024) {
+                alert("Image size must not exceed 5 MB.");
+                event.target.value = "";
+                preview.removeAttribute("src");
+                preview.style.display = "none";
+                defaultPreview.style.display = "flex";
+                return;
+            }
+
+            const allowedTypes = [
+                "image/jpeg",
+                "image/png",
+                "image/webp"
+            ];
+
+            if (!allowedTypes.includes(file.type)) {
+                alert("Only JPG, PNG and WEBP images are allowed.");
+                event.target.value = "";
+                preview.removeAttribute("src");
+                preview.style.display = "none";
+                defaultPreview.style.display = "flex";
+                return;
+            }
+
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                preview.src = e.target.result;
+                preview.style.display = "block";
+                defaultPreview.style.display = "none";
+            };
+
+            reader.readAsDataURL(file);
+        }
+    </script>
+
+    <partial name="_ValidationScriptsPartial" />
+}

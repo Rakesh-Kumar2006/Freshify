@@ -1,0 +1,621 @@
+﻿@using System.Linq
+@using System.Security.Claims
+@using Microsoft.EntityFrameworkCore
+@inject Freshify.Data.ApplicationDbContext DbContext
+
+@{
+    var pageTitle = ViewData["Title"] ?? "Online Grocery Store";
+    var homeUrl = Url.Action("Index", "Home");
+
+    string? profileImageUrl = null;
+
+    var customerName = User.Identity?.Name ?? "Customer";
+
+    var customerInitial = string.IsNullOrWhiteSpace(customerName)
+        ? "U"
+        : customerName.Trim().Substring(0, 1).ToUpperInvariant();
+
+    if (User.Identity?.IsAuthenticated == true &&
+        User.IsInRole("Customer") &&
+        int.TryParse(
+            User.FindFirst(ClaimTypes.NameIdentifier)?.Value,
+            out var customerId))
+    {
+        profileImageUrl = await DbContext.Users
+            .AsNoTracking()
+            .Where(u =>
+                u.UserId == customerId &&
+                u.Role == "Customer")
+            .Select(u => u.ImageUrl)
+            .FirstOrDefaultAsync();
+    }
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1" />
+
+    <title>@pageTitle - Freshify</title>
+
+    <link rel="stylesheet" href="~/css/bootstrap.min.css" />
+
+    <style>
+            body {
+                background: #f7f9f7;
+                color: #283c30;
+                font-family: "Segoe UI", Arial, sans-serif;
+            }
+
+            html {
+                scroll-behavior: smooth;
+                scroll-padding-top: 90px;
+            }
+
+            .top-bar {
+                background: #206543;
+                color: white;
+                padding: 7px 15px;
+                text-align: center;
+                font-size: 13px;
+            }
+
+            .navbar-brand {
+                color: #206543 !important;
+                font-size: 28px;
+                font-weight: 800;
+            }
+
+            .nav-link {
+                font-weight: 600;
+                font-size: 14px;
+            }
+
+            .btn-success {
+                background: #206543;
+                border-color: #206543;
+            }
+
+                .btn-success:hover {
+                    background: #174d32;
+                    border-color: #174d32;
+                }
+
+            /* PROFILE PHOTO */
+            .profile-avatar-link {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 44px;
+                height: 44px;
+                flex-shrink: 0;
+                border: 2px solid #206543;
+                border-radius: 50%;
+                overflow: hidden;
+                background: #e8f2e9;
+                color: #206543;
+                text-decoration: none;
+            }
+
+                .profile-avatar-link:hover {
+                    box-shadow: 0 0 0 4px rgba(32, 101, 67, .1);
+                }
+
+                .profile-avatar-link:focus-visible {
+                    outline: 3px solid #83ae91;
+                    outline-offset: 3px;
+                }
+
+                .profile-avatar-link img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                }
+
+            .profile-avatar-initial {
+                font-size: 19px;
+                font-weight: 800;
+            }
+
+            .hero {
+                background: #e8f2e9;
+                border: 1px solid #dce9dd;
+                border-radius: 16px;
+                padding: 35px;
+            }
+
+                .hero h1 {
+                    font-size: clamp(30px, 4vw, 46px);
+                    font-weight: 800;
+                    color: #1e5135;
+                    line-height: 1.15;
+                }
+
+            .hero-image {
+                width: 100%;
+                max-width: 230px;
+                height: 210px;
+                object-fit: contain;
+                background: white;
+                padding: 20px;
+                border-radius: 16px;
+            }
+
+            .hero-placeholder {
+                font-size: 90px;
+                padding: 20px;
+            }
+
+            .section-title {
+                font-size: 25px;
+                font-weight: 750;
+                color: #244b32;
+            }
+
+            .category-card {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+                height: 100%;
+                background: white;
+                border: 1px solid #e0e7df;
+                border-radius: 12px;
+                padding: 20px 12px;
+                color: #283c30;
+                text-align: center;
+                cursor: pointer;
+                transition: border-color .2s, background-color .2s;
+            }
+
+                .category-card:hover,
+                .category-card[aria-pressed="true"] {
+                    border-color: #206543;
+                    background: #edf5ee;
+                }
+
+                .category-card:focus-visible {
+                    outline: 3px solid #83ae91;
+                    outline-offset: 3px;
+                }
+
+            .category-image {
+                width: 100%;
+                height: 120px;
+                object-fit: contain;
+                margin-bottom: 14px;
+            }
+
+            .category-placeholder {
+                width: 100%;
+                height: 120px;
+                display: grid;
+                place-items: center;
+                font-size: 45px;
+                margin-bottom: 14px;
+            }
+
+            .category-card strong {
+                display: block;
+                font-size: 14px;
+                line-height: 1.5;
+                overflow-wrap: anywhere;
+            }
+
+            .product-card {
+                height: 100%;
+                border: 1px solid #e0e7df;
+                border-radius: 12px;
+                background: white;
+                overflow: hidden;
+            }
+
+            .product-art {
+                position: relative;
+                height: 180px;
+                background: #f1f5ef;
+                display: grid;
+                place-items: center;
+                font-size: 50px;
+            }
+
+                .product-art img {
+                    width: 100%;
+                    height: 180px;
+                    padding: 18px;
+                    object-fit: contain;
+                }
+
+            .product-name {
+                font-size: 16px;
+                font-weight: 700;
+            }
+
+            .product-price {
+                font-size: 20px;
+                font-weight: 800;
+                color: #206543;
+            }
+
+            .stock-badge {
+                position: absolute;
+                top: 10px;
+                left: 10px;
+                border-radius: 6px;
+                padding: 4px 7px;
+                background: white;
+                color: #206543;
+                font-size: 11px;
+                font-weight: 600;
+            }
+
+                .stock-badge.unavailable {
+                    background: #fff0ec;
+                    color: #a33d30;
+                }
+
+            .benefit {
+                background: white;
+                border: 1px solid #e0e7df;
+                border-radius: 12px;
+                padding: 22px;
+                height: 100%;
+            }
+
+            .login-panel {
+                max-width: 440px;
+                margin: 35px auto;
+                background: white;
+                border: 1px solid #e0e7df;
+                border-radius: 16px;
+                padding: 30px;
+                box-shadow: 0 8px 25px rgba(32, 101, 67, .05);
+            }
+
+                .login-panel .form-control {
+                    padding: 11px 12px;
+                }
+
+            .site-footer {
+                background: #eaf0e8;
+                border-top: 1px solid #dce5d9;
+            }
+
+                .site-footer a {
+                    color: #345b3e;
+                    text-decoration: none;
+                }
+
+                    .site-footer a:hover {
+                        text-decoration: underline;
+                    }
+
+            [hidden] {
+                display: none !important;
+            }
+
+            @@media (max-width: 575px) {
+                .hero {
+                    padding: 25px;
+                }
+
+                .category-card {
+                    padding: 16px 10px;
+                }
+
+                .category-image,
+                .category-placeholder {
+                    height: 100px;
+                }
+
+                .category-card strong {
+                    font-size: 13px;
+                }
+
+                .product-art,
+                .product-art img {
+                    height: 145px;
+                }
+
+                .login-panel {
+                    padding: 24px;
+                }
+            }
+    </style>
+
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+
+<body>
+    <div class="top-bar">
+        Fresh groceries and everyday essentials.
+    </div>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom sticky-top py-3">
+        <div class="container">
+
+            <a class="navbar-brand"
+               asp-controller="Home"
+               asp-action="Index">
+                Freshify
+            </a>
+
+            <button class="navbar-toggler"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#customerNavbar"
+                    aria-controls="customerNavbar"
+                    aria-expanded="false"
+                    aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="customerNavbar">
+                <ul class="navbar-nav mx-auto gap-lg-3">
+                    <li class="nav-item">
+                        <a class="nav-link" href="@homeUrl">
+                            Home
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           asp-controller="Products"
+                           asp-action="Index">
+                            Products
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           asp-controller="Orders"
+                           asp-action="Index">
+                            My Orders
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           asp-controller="Reviews"
+                           asp-action="Index">
+                            Reviews
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           asp-controller="About"
+                           asp-action="Index">
+                            About Us
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="d-flex flex-wrap align-items-center gap-2 mt-3 mt-lg-0">
+
+                    <!-- CART -->
+                    <a asp-controller="Cart"
+                       asp-action="Index"
+                       class="btn btn-outline-success d-inline-flex align-items-center gap-2"
+                       aria-label="Open shopping cart">
+
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                             width="20"
+                             height="20"
+                             viewBox="0 0 24 24"
+                             fill="none"
+                             stroke="currentColor"
+                             stroke-width="1.8"
+                             stroke-linecap="round"
+                             stroke-linejoin="round"
+                             aria-hidden="true">
+                            <path d="M3 3h2l3 12h11l3-9H6" />
+                            <circle cx="9" cy="20" r="1" />
+                            <circle cx="19" cy="20" r="1" />
+                        </svg>
+
+                        Cart
+                    </a>
+
+                    <!-- ACCOUNT -->
+                    @if (User.Identity?.IsAuthenticated == true &&
+                         User.IsInRole("Customer"))
+                    {
+                        <a asp-controller="CustomerAccount"
+                           asp-action="MyProfile"
+                           class="profile-avatar-link ms-1"
+                           title="My Profile"
+                           aria-label="Open My Profile">
+
+                            @if (!string.IsNullOrWhiteSpace(profileImageUrl))
+                            {
+                                <img src="@Url.Content(profileImageUrl)" alt="" />
+                            }
+                            else
+                            {
+                                <span class="profile-avatar-initial"
+                                      aria-hidden="true">
+                                    @customerInitial
+                                </span>
+                            }
+                        </a>
+                    }
+                    else if (User.Identity?.IsAuthenticated == true &&
+                             User.IsInRole("Admin"))
+                    {
+                        <a asp-controller="Account"
+                           asp-action="Login"
+                           class="btn btn-outline-success">
+                            Admin Account
+                        </a>
+
+                        <form asp-controller="Account"
+                              asp-action="Logout"
+                              method="post"
+                              class="m-0">
+
+                            @Html.AntiForgeryToken()
+
+                            <button type="submit"
+                                    class="btn btn-outline-danger">
+                                Logout
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <a asp-controller="CustomerAccount"
+                           asp-action="Login"
+                           class="btn btn-success">
+                            Login
+                        </a>
+
+                    }
+
+                </div>
+            </div>
+
+        </div>
+    </nav>
+
+    <main>
+        @RenderBody()
+    </main>
+
+    <footer class="site-footer mt-5 pt-4 pb-3" id="about">
+        <div class="container">
+            <div class="row g-4">
+
+                <div class="col-md-6">
+                    <h4 class="fw-bold text-success">Freshify</h4>
+                    <p class="text-muted small mb-0"
+                       style="max-width:400px;">
+                        Explore fresh produce, pantry staples,
+                        snacks, and everyday grocery essentials.
+                    </p>
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <h6 class="fw-bold">Quick Links</h6>
+
+                    <p class="small mb-0">
+                        <a asp-controller="Products"
+                           asp-action="Index">
+                            Products
+                        </a>
+                    </p>
+
+                    <p class="small mb-0">
+                        <a asp-controller="Orders"
+                           asp-action="Index">
+                            My Orders
+                        </a>
+                    </p>
+
+                    <p class="small mb-0">
+                        <a asp-controller="Payments"
+                           asp-action="Index">
+                            My Payments
+                        </a>
+                    </p>
+
+                    <p class="small mb-0">
+                        <a asp-controller="Reviews"
+                           asp-action="Index">
+                            Reviews & Feedback
+                        </a>
+                    </p>
+
+                    <p class="small mb-0">
+                        <a asp-controller="About"
+                           asp-action="Index">
+                            About Us
+                        </a>
+                    </p>
+
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <h6 class="fw-bold">Account</h6>
+
+                    @if (User.Identity?.IsAuthenticated == true &&
+                         User.IsInRole("Customer"))
+                    {
+                        <p class="small mb-2">
+                            Hello, @(User.Identity.Name ?? "Customer")
+                        </p>
+
+                        <p class="small mb-2">
+                            <a asp-controller="CustomerAccount"
+                               asp-action="MyProfile">
+                                My Profile
+                            </a>
+                        </p>
+
+                        <form asp-controller="CustomerAccount"
+                              asp-action="Logout"
+                              method="post">
+
+                            @Html.AntiForgeryToken()
+
+                            <button type="submit"
+                                    class="btn btn-outline-danger btn-sm">
+                                Logout
+                            </button>
+                        </form>
+                    }
+                    else if (User.Identity?.IsAuthenticated == true &&
+                             User.IsInRole("Admin"))
+                    {
+                        <p class="small mb-2">
+                            Signed in as Administrator
+                        </p>
+
+                        <form asp-controller="Account"
+                              asp-action="Logout"
+                              method="post">
+
+                            @Html.AntiForgeryToken()
+
+                            <button type="submit"
+                                    class="btn btn-outline-danger btn-sm">
+                                Logout
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <p class="small mb-2">
+                            <a asp-controller="CustomerAccount"
+                               asp-action="Login">
+                                User Login
+                            </a>
+                        </p>
+
+                        <p class="small mb-0">
+                            <a asp-controller="Account"
+                               asp-action="Login">
+                                Admin Login
+                            </a>
+                        </p>
+                    }
+                </div>
+
+            </div>
+
+            <hr class="my-4" />
+
+            <p class="small text-muted text-center mb-0">
+                &copy; @DateTime.Now.Year Freshify. All rights reserved.
+            </p>
+        </div>
+    </footer>
+
+    <script src="~/js/bootstrap.bundle.min.js"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

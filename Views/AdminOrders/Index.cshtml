@@ -1,0 +1,589 @@
+﻿@using System.Linq
+@model Freshify.ViewModels.AdminOrdersViewModel
+
+@{
+    ViewData["Title"] = "Order Management";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    var statuses = new[]
+    {
+        "Pending",
+        "Confirmed",
+        "Processing",
+        "Shipped",
+        "Delivered",
+        "Cancelled"
+    };
+
+    var paymentStatuses = new[]
+    {
+        "Pending",
+        "Paid"
+    };
+}
+
+<div class="container-fluid">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center
+        flex-wrap gap-2 mb-4">
+        <div>
+            <h3 class="fw-bold mb-1">
+                <i class="bi bi-bag-check-fill text-success me-2"
+                   aria-hidden="true"></i>
+                Order Management
+            </h3>
+
+            <p class="text-muted mb-0">
+                View and manage customer grocery orders.
+            </p>
+        </div>
+
+        <span class="badge bg-success fs-6">
+            Total Orders: @Model.TotalOrders
+        </span>
+    </div>
+
+    <!-- ALERTS -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show"
+             role="alert">
+            @TempData["Success"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show"
+             role="alert">
+            @TempData["Error"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- ORDER STATISTICS -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="dashboard-panel">
+                <p class="text-muted mb-1">Total Orders</p>
+                <h3 class="fw-bold">@Model.TotalOrders</h3>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <div class="dashboard-panel">
+                <p class="text-muted mb-1">Pending Orders</p>
+                <h3 class="fw-bold text-warning">
+                    @Model.PendingOrders
+                </h3>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <div class="dashboard-panel">
+                <p class="text-muted mb-1">Delivered Orders</p>
+                <h3 class="fw-bold text-success">
+                    @Model.DeliveredOrders
+                </h3>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <div class="dashboard-panel">
+                <p class="text-muted mb-1">Cancelled Orders</p>
+                <h3 class="fw-bold text-danger">
+                    @Model.CancelledOrders
+                </h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- ORDERS TABLE -->
+    <div class="dashboard-panel">
+        <div class="d-flex justify-content-between align-items-center
+            flex-wrap gap-2 mb-3">
+            <h5 class="fw-bold mb-0">
+                <i class="bi bi-list-ul text-success me-2"
+                   aria-hidden="true"></i>
+                All Orders
+            </h5>
+
+            <input type="search"
+                   id="orderSearch"
+                   class="form-control"
+                   style="max-width:260px;"
+                   placeholder="Search orders..."
+                   aria-label="Search orders" />
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle"
+                   id="ordersTable">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col">Order ID</th>
+                        <th scope="col">Customer</th>
+                        <th scope="col">Date</th>
+                        <th scope="col">Total</th>
+                        <th scope="col">Order Status</th>
+                        <th scope="col">Payment Status</th>
+                        <th scope="col" class="text-center">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var order in Model.Orders)
+                    {
+                        var latestPayment = order.Payments
+                            .OrderByDescending(p => p.PaymentId)
+                            .FirstOrDefault();
+
+                        <tr>
+                            <td class="fw-semibold">
+                                #@order.OrderId
+                            </td>
+
+                            <td>
+                                @(order.User?.FullName ?? "Unknown")
+                            </td>
+
+                            <td class="text-nowrap">
+                                @order.OrderDate.ToString("dd MMM yyyy")
+                            </td>
+
+                            <td class="text-nowrap">
+                                ₹@order.TotalAmount.ToString("N2")
+                            </td>
+
+                            <td>
+                                @if (order.OrderStatus == "Delivered")
+                                {
+                                    <span class="badge bg-success">
+                                        Delivered
+                                    </span>
+                                }
+                                else if (order.OrderStatus == "Cancelled")
+                                {
+                                    <span class="badge bg-danger">
+                                        Cancelled
+                                    </span>
+                                }
+                                else if (order.OrderStatus == "Pending")
+                                {
+                                    <span class="badge bg-warning text-dark">
+                                        Pending
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-info text-dark">
+                                        @order.OrderStatus
+                                    </span>
+                                }
+                            </td>
+
+                            <td>
+                                @if (latestPayment == null)
+                                {
+                                    <span class="text-muted small">
+                                        No payment
+                                    </span>
+                                }
+                                else if (latestPayment.PaymentStatus == "Paid")
+                                {
+                                    <span class="badge bg-success">Paid</span>
+                                }
+                                else if (latestPayment.PaymentStatus == "Pending")
+                                {
+                                    <span class="badge bg-warning text-dark">
+                                        Pending
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">
+                                        @latestPayment.PaymentStatus
+                                    </span>
+                                }
+                            </td>
+
+                            <td class="text-center text-nowrap">
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-primary me-1"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#detailsModal-@order.OrderId"
+                                        title="View Order"
+                                        aria-label="View Order #@order.OrderId">
+                                    <i class="bi bi-eye"
+                                       aria-hidden="true"></i>
+                                </button>
+
+                                @if (order.OrderStatus != "Delivered" &&
+                                     order.OrderStatus != "Cancelled")
+                                {
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-success"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#statusModal-@order.OrderId"
+                                            title="Update Order Status"
+                                            aria-label="Update Order #@order.OrderId status">
+                                        <i class="bi bi-pencil-square"
+                                           aria-hidden="true"></i>
+                                    </button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (!Model.Orders.Any())
+        {
+            <p class="text-center text-muted py-4 mb-0">
+                No orders found.
+            </p>
+        }
+        else
+        {
+            <p id="noMatchingOrders"
+               class="text-center text-muted py-4 mb-0"
+               hidden>
+                No matching orders found.
+            </p>
+        }
+    </div>
+</div>
+
+<!-- ORDER MODALS -->
+@foreach (var order in Model.Orders)
+{
+    <!-- ORDER DETAILS -->
+    <div class="modal fade"
+         id="detailsModal-@order.OrderId"
+         tabindex="-1"
+         aria-labelledby="detailsTitle-@order.OrderId"
+         aria-hidden="true">
+
+        <div class="modal-dialog modal-lg modal-dialog-centered
+            modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"
+                        id="detailsTitle-@order.OrderId">
+                        Order #@order.OrderId
+                    </h5>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <p>
+                        <strong>Customer:</strong>
+                        @(order.User?.FullName ?? "Unknown")
+                    </p>
+
+                    <p>
+                        <strong>Order Date (UTC):</strong>
+                        @order.OrderDate.ToString("dd MMM yyyy hh:mm tt")
+                    </p>
+
+                    <p>
+                        <strong>Order Status:</strong>
+                        @order.OrderStatus
+                    </p>
+
+                    <h6 class="fw-bold mt-4">Ordered Products</h6>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th scope="col">Product</th>
+                                    <th scope="col">Quantity</th>
+                                    <th scope="col">Unit Price</th>
+                                    <th scope="col">Subtotal</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                @foreach (var item in order.OrderItems)
+                                {
+                                    <tr>
+                                        <td>
+                                            @(item.Product?.Name ?? "Product")
+                                        </td>
+                                        <td>@item.Quantity</td>
+                                        <td class="text-nowrap">
+                                            ₹@item.UnitPrice.ToString("N2")
+                                        </td>
+                                        <td class="text-nowrap">
+                                            ₹@item.Subtotal.ToString("N2")
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h5 class="text-end fw-bold">
+                        Total: ₹@order.TotalAmount.ToString("N2")
+                    </h5>
+
+                    <!-- PAYMENT INFORMATION AND STATUS EDITOR -->
+                    <h6 class="fw-bold mt-4">Payment Information</h6>
+
+                    @if (order.Payments.Any())
+                    {
+                        @foreach (var payment in order.Payments
+                            .OrderByDescending(p => p.PaymentId))
+                        {
+                            <div class="border rounded p-3 mb-3">
+                                <div class="row g-3 mb-3">
+                                    <div class="col-sm-6">
+                                        <p class="small text-muted mb-1">
+                                            Payment ID
+                                        </p>
+                                        <p class="fw-semibold mb-0">
+                                            #@payment.PaymentId
+                                        </p>
+                                    </div>
+
+                                    <div class="col-sm-6">
+                                        <p class="small text-muted mb-1">
+                                            Payment Method
+                                        </p>
+                                        <p class="fw-semibold mb-0">
+                                            @(payment.PaymentMethod == "CashOnDelivery"
+                                                ? "Cash on Delivery"
+                                                : payment.PaymentMethod)
+                                        </p>
+                                    </div>
+
+                                    <div class="col-sm-6">
+                                        <p class="small text-muted mb-1">
+                                            Amount
+                                        </p>
+                                        <p class="fw-semibold mb-0">
+                                            ₹@payment.Amount.ToString("N2")
+                                        </p>
+                                    </div>
+
+                                    <div class="col-sm-6">
+                                        <p class="small text-muted mb-1">
+                                            Payment Date (UTC)
+                                        </p>
+                                        <p class="fw-semibold mb-0">
+                                            @(payment.PaymentDate?.ToString(
+                                                "dd MMM yyyy hh:mm tt")
+                                                ?? "Not collected")
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <form asp-controller="AdminOrders"
+                                      asp-action="UpdatePaymentStatus"
+                                      method="post">
+
+                                    @Html.AntiForgeryToken()
+
+                                    <input type="hidden"
+                                           name="orderId"
+                                           value="@order.OrderId" />
+
+                                    <input type="hidden"
+                                           name="paymentId"
+                                           value="@payment.PaymentId" />
+
+                                    <label for="paymentStatus-@payment.PaymentId"
+                                           class="form-label fw-semibold">
+                                        Payment Status
+                                    </label>
+
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <select id="paymentStatus-@payment.PaymentId"
+                                                name="paymentStatus"
+                                                class="form-select"
+                                                style="max-width:220px;"
+                                                required>
+
+                                            @if (!paymentStatuses.Contains(
+                                                payment.PaymentStatus))
+                                            {
+                                                <option value="" selected disabled>
+                                                    Select status
+                                                </option>
+                                            }
+
+                                            @foreach (var status in paymentStatuses)
+                                            {
+                                                if (status == payment.PaymentStatus)
+                                                {
+                                                    <option value="@status" selected>
+                                                        @status
+                                                    </option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@status">
+                                                        @status
+                                                    </option>
+                                                }
+                                            }
+                                        </select>
+
+                                        <button type="submit"
+                                                class="btn btn-success">
+                                            Save Payment Status
+                                        </button>
+                                    </div>
+
+                                    <p class="small text-muted mt-2 mb-0">
+                                        Select Paid after collecting the payment.
+                                        Selecting Pending clears the payment date.
+                                    </p>
+                                </form>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted">
+                            No payment information available.
+                        </p>
+                    }
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ORDER STATUS EDITOR -->
+    @if (order.OrderStatus != "Delivered" &&
+         order.OrderStatus != "Cancelled")
+    {
+        <div class="modal fade"
+             id="statusModal-@order.OrderId"
+             tabindex="-1"
+             aria-labelledby="statusTitle-@order.OrderId"
+             aria-hidden="true">
+
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <form asp-controller="AdminOrders"
+                          asp-action="UpdateStatus"
+                          asp-route-id="@order.OrderId"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <div class="modal-header">
+                            <h5 class="modal-title"
+                                id="statusTitle-@order.OrderId">
+                                Update Order Status
+                            </h5>
+
+                            <button type="button"
+                                    class="btn-close"
+                                    data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                        </div>
+
+                        <div class="modal-body">
+                            <p>Order #@order.OrderId</p>
+
+                            <label for="orderStatus-@order.OrderId"
+                                   class="form-label fw-semibold">
+                                Select Status
+                            </label>
+
+                            <select id="orderStatus-@order.OrderId"
+                                    name="status"
+                                    class="form-select"
+                                    required>
+                                @foreach (var status in statuses)
+                                {
+                                    if (status == order.OrderStatus)
+                                    {
+                                        <option value="@status" selected>
+                                            @status
+                                        </option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@status">
+                                            @status
+                                        </option>
+                                    }
+                                }
+                            </select>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button"
+                                    class="btn btn-secondary"
+                                    data-bs-dismiss="modal">
+                                Cancel
+                            </button>
+
+                            <button type="submit"
+                                    class="btn btn-success">
+                                Update Status
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+}
+
+@section Scripts {
+    <script>
+        document.getElementById("orderSearch")
+            .addEventListener("input", function () {
+                const search = this.value.trim().toLowerCase();
+                let visibleCount = 0;
+
+                document.querySelectorAll("#ordersTable tbody tr")
+                    .forEach(function (row) {
+                        const matches = row.textContent
+                            .toLowerCase()
+                            .includes(search);
+
+                        row.hidden = !matches;
+
+                        if (matches) {
+                            visibleCount++;
+                        }
+                    });
+
+                const emptyMessage =
+                    document.getElementById("noMatchingOrders");
+
+                if (emptyMessage) {
+                    emptyMessage.hidden = visibleCount > 0;
+                }
+            });
+    </script>
+}
